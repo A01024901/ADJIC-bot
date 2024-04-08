@@ -1,11 +1,2 @@
 Mira como hice el commit 
-<<<<<<< HEAD
 pelas >V
-=======
-pelas
-
-Enrique es puto
-Enrique concentrate
-
-Mira Yair
->>>>>>> 737e13168f51e9ccb409ea82803e9e8098f5bd41
