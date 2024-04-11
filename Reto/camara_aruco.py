@@ -11,7 +11,7 @@ from cv_bridge import CvBridge , CvBridgeError
 class camara:
     def __init__(self):
         ###--- Inicio del Nodo ---###
-        rospy.init_node('Aruco Detector')
+        rospy.init_node('aruco_detector')
         rospy.on_shutdown(self.cleanup)
         rate = rospy.Rate(30)
         #self.camera = cv2.VideoCapture(0)
@@ -25,8 +25,8 @@ class camara:
         self.pos_aruco = Point()
         self.pos_camera = Point()
         self.bd_object = CvBridge()
-        self.aruco_dictionary = cv2.aruco.Dictionary.get(cv2.aruco.DICT_6x6_250)
-        self.aruco_detector = cv2.aruco.ArucoDetector_create(self.aruco_dictionary)
+        aruco_dictionary = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6x6_250)
+        self.aruco_detector = cv2.aruco.ArucoDetector_create(aruco_dictionary)
         self.aruco_params = cv2.aruco.DetectorParameters_create()
 
         ###--- Subscriptores ---###
@@ -48,6 +48,9 @@ class camara:
                 self.pos_aruco.z = tvecs[2]
                 self.aruco_flag_pub.publish(flag)
                 self.pos_aruco_pub.publish(self.pos_aruco)
+            
+            else: 
+                self.aruco_flag_pub.publish(flag)
 
     def aruco_finder(self , img):
         img = self.img
@@ -80,3 +83,6 @@ class camara:
     def cleanup (self):
         print ("Apagando Camara")
         
+
+if __name__ == "__main__": 
+    camara()
