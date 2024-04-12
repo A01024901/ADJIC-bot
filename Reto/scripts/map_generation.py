@@ -5,7 +5,7 @@ from std_msgs.msg import Bool
 from geometry_msgs.msg import Point
 
 
-class motor_control:
+class map_generation:
     def __init__(self):
         ###--- Inicio del Nodo ---###
         rospy.init_node('motor_control')
@@ -41,4 +41,4 @@ class motor_control:
         
 
 if __name__ == "__main__": 
-    motor_control()
+    map_generation()

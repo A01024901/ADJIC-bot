@@ -25,6 +25,7 @@ class camara:
         self.pos_aruco = Point()
         self.pos_camera = Point()
         self.bd_object = CvBridge()
+        cv2.
         aruco_dictionary = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6x6_250)
         self.aruco_detector = cv2.aruco.ArucoDetector_create(aruco_dictionary)
         self.aruco_params = cv2.aruco.DetectorParameters_create()
@@ -56,6 +57,8 @@ class camara:
         img = self.img
         corners , ids , rejected = self.aruco_detector.detectMarkers(img , parameters=self.aruco_params)
         flag = False
+        tvecs = [0 , 0 , 0]
+        rvecs = [0 , 0 , 0]
 
         if ids is not None:
             flag = True
