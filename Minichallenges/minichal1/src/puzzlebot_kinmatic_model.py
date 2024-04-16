@@ -40,7 +40,7 @@ class puzzlebot_kinemactic_model:
 
         #while rospy.get_time() == 0: print ("Simulacion no iniciada")#Descomentar en simulacion 
 
-        print("Nodo operando")
+        print("Simulacion operando")
 
         while not rospy.is_shutdown():
             
@@ -61,8 +61,8 @@ class puzzlebot_kinemactic_model:
 
     def get_wheel_speed(self):
         self.wl = (2 * self.v - self.w * self.l)/(self.r * 2)
-        self.wr = (2 * self.v)/self.r - self.wl
-        print (self.wr , self.wl , self.theta) 
+        self.wr = (2 * self.v + self.w * self.l)/(self.r * 2)
+        #print (self.wr , self.wl , self.theta) 
     
     def get_pose_stamped(self , x , y , yaw):
         ###--- Write Pose_stamped message ---###
@@ -88,7 +88,7 @@ class puzzlebot_kinemactic_model:
         self.w = msg.angular.z
 
     def cleanup (self):
-        print ("Apagando Nodo")
+        print ("Apagando Simulacion")
         self.pose_pub.publish(PoseStamped())
         self.wr_pub.publish(0.0)
         self.wl_pub.publish(0.0)
