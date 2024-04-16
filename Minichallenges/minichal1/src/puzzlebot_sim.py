@@ -11,7 +11,6 @@ class puzzlebot_sim:
         rospy.init_node('puzzlebot_sim')
         rospy.on_shutdown(self.cleanup)
         rate = rospy.Rate(30)
-        #self.camera = cv2.VideoCapture(0)
 
         ###--- Parametros ---###
         
