@@ -14,7 +14,7 @@ Dependencias recomentdadas de paquete
 catkin_create_pkg minichalN rospy roscpp tf geometry std_msgs
 ```
 
-Informacion adicional se puede encontrar en el repo de manchester
+Informacion adicional se puede encontrar en el repo de manchester:
 >https://github.com/ManchesterRoboticsLtd/TE3003B_Integration_of_Robotics_and_Intelligent_Systems/tree/main/Week%202
 
 Y los trabajos no relacionados con programacion en el drive 
