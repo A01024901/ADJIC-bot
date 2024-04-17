@@ -44,7 +44,7 @@ class puzzlebot_kinemactic_model:
 
         while not rospy.is_shutdown():
             
-            self.update_robot_pose(self.v , self.w)
+            self.update_robot_pose()
             pose_stamped = self.get_pose_stamped(self.x , self.y , self.theta)
             self.get_wheel_speed()
 
@@ -54,14 +54,14 @@ class puzzlebot_kinemactic_model:
             self.wl_pub.publish(self.wl)
             rate.sleep()
 
-    def update_robot_pose(self , v , w):
+    def update_robot_pose(self ):
         self.x = self.x + self.v * np.cos(self.theta) * self.dt   
         self.y = self.y + self.v * np.sin(self.theta) * self.dt  
         self.theta = self.theta + self.w * self.dt             
 
     def get_wheel_speed(self):
         self.wl = (2 * self.v - self.w * self.l)/(self.r * 2)
-        self.wr = (2 * self.v + self.w * self.l)/(self.r * 2)
+        self.wr = (2 * self.v +  self.w * self.l)/(self.r * 2)
         #print (self.wr , self.wl , self.theta) 
     
     def get_pose_stamped(self , x , y , yaw):
