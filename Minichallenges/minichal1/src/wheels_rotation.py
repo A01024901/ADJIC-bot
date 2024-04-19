@@ -43,9 +43,11 @@ class wheels_rotation:
             t = rospy.Time.now().to_sec() 
             self.contJoints.header.stamp = rospy.Time.now() 
             self.contJoints.position[0] = self.wrap_to_Pi(self.wl * t) 
-            self.contJoints.position[0] += self.wr / t
+            self.contJoints.position[0] += self.wl / t
 
-            self.contJoints.position[1] = self.wrap_to_Pi(self.wr * t)  
+            self.contJoints.position[1] = self.wrap_to_Pi(self.wr * t) 
+            self.contJoints.position[1] += self.wr / t
+            
             joint_pub.publish(self.contJoints) 
             rate.sleep()
 

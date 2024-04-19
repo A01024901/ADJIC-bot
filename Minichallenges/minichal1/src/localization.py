@@ -21,7 +21,7 @@ class localisation:
 
         ###--- Publishers ---###
         self.odom_pub = rospy.Publisher("odom" , Odometry , queue_size=1)
-        self.pos_pub = rospy.Publisher("pose_odom" , PoseStamped , queue_size=1)
+        #self.pos_pub = rospy.Publisher("pose_odom" , PoseStamped , queue_size=1)
 
         ###--- Robot Constants ---###
         self.r = 0.05
@@ -68,7 +68,7 @@ class localisation:
         #print (self.v , self.w , self.theta)
 
     def get_odom (self): 
-        self.odom.header.frame_id = "Origin"
+        self.odom.header.frame_id = "base_link"
         self.odom.child_frame_id = "Origin2"
         self.odom.pose.pose.position.x = self.x
         self.odom.pose.pose.position.y = self.y
