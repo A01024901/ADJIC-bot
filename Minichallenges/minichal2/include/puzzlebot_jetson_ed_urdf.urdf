@@ -21,13 +21,13 @@
         <collision>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-                <mesh filename="package://minichal1/robot_models/MCR2_1000_13_Chassis.stl"/>
+                <mesh filename="package://minichal2/robot_models/MCR2_1000_13_Chassis.stl"/>
             </geometry>
         </collision>
         <visual>
             <origin rpy="1.57079632679 0 1.57079632679" xyz="0 0 0"/>
             <geometry>
-                <mesh filename="package://minichal1/robot_models/MCR2_1000_13_Chassis.stl"/>
+                <mesh filename="package://minichal2/robot_models/MCR2_1000_13_Chassis.stl"/>
             </geometry>
         </visual>
     </link>
@@ -47,13 +47,13 @@
         <collision>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-                <mesh filename="package://minichal1/robot_models/MCR2_1000_13_Chassis.stl"/>
+                <mesh filename="package://minichal2/robot_models/MCR2_1000_13_Chassis.stl"/>
             </geometry>
         </collision>
         <visual>
             <origin rpy="1.57079632679 0 1.57079632679" xyz="0 0 0"/>
             <geometry>
-                <mesh filename="package://minichal1/robot_models/MCR2_1000_13_Chassis.stl"/>
+                <mesh filename="package://minichal2/robot_models/MCR2_1000_13_Chassis.stl"/>
             </geometry>
         </visual>
     </link>
