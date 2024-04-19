@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<launch>
+
+        <node pkg="puzzlebot_sim" type="puzzlebot_kinematic_model.py" name="puzzlebot_simulation" output="screen"/>
+
+        <node pkg="puzzlebot_sim" type="localisation.py" name="puzzlebot_localisation" output="screen"/>
+
+        <node pkg="tf2_ros" type="static_transform_publisher" name="map_joint" args="odomPose_x  odomPose_y  odomPose_z  odomPose_roll  odomPose_pitch  odomPose_yaw   map   odom"/>
+
+        <arg name="puzzlebot_sim_model" default="$(find puzzlebot_sim)/urdf/puzzlebot_jetson_ed_urdf.urdf"/>
+        <param name="robot_description" command="cat $(arg puzzlebot_sim_model)" />
+
+        <node pkg="puzzlebot_sim" type="joint_state_publisher.py" name="joint_state_publisher" output="screen"/>
+
+        <node pkg="robot_state_publisher" type="robot_state_publisher" name="simulated_state_publisher" output="screen"/>
+
+        <arg name="rvizconfig" default="$(find puzzlebot_sim)/rviz/my_rviz_configuration.rviz" />
+
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+
+</launch>
