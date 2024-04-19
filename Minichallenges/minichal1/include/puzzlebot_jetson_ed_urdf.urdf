@@ -34,7 +34,7 @@
 
 
     <joint name="wr_joint" type="continuous">
-        <parent link="base_link"/>
+        <parent link="chassis"/>
         <child link="right_wheel"/>
         <origin xyz="0.0 0.0 0.05"/>
         <axis xyz="0 1 0"/>
@@ -62,7 +62,7 @@
 
 
     <joint name="wl_joint" type="continuous">
-        <parent link="base_link"/>
+        <parent link="chassis"/>
         <child link="left_wheel"/>
         <origin xyz="0.0 0.0 0.05"/>
         <axis xyz="0 1 0"/>
@@ -87,5 +87,10 @@
             </geometry>
         </visual>
     </link>
+
+
+
+<!-- FINISH THE URDF-->
+
 
 </robot>
