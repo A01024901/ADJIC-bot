@@ -49,9 +49,9 @@ class tf_broadcaster:
 
         while not rospy.is_shutdown():
 
-            self.move_puzzlebot('Origin' , 'Bot')
-            self.rotate_wheel_r('Bot' , 'right_w')
-            self.rotate_wheel_l('Bot' , 'left_w')
+            self.move_puzzlebot('base_link' , 'chassis')
+            self.rotate_wheel_r('chassis' , 'right_wheel')
+            self.rotate_wheel_l('chassis' , 'left_wheel')
 
             rate.sleep()
 

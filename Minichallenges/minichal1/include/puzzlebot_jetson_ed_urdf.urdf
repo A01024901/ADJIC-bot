@@ -3,8 +3,8 @@
 
 
 <!-- Dummy link to fiz robot chassis -->
-  <link name="base_link">
-  </link>
+  <link name="base_link">  </link>
+
   
     <joint name="chassis_joint" type="fixed">
         <parent link="base_link"/>
@@ -21,17 +21,71 @@
         <collision>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-                <mesh filename="/robot_models/MCR2_1000_13_Chassis.stl"/>
+                <mesh filename="package://minichal1/robot_models/MCR2_1000_13_Chassis.stl"/>
             </geometry>
         </collision>
         <visual>
             <origin rpy="1.57079632679 0 1.57079632679" xyz="0 0 0"/>
             <geometry>
-                <mesh filename="/robot_models/MCR2_1000_13_Chassis.stl"/>
+                <mesh filename="package://minichal1/robot_models/MCR2_1000_13_Chassis.stl"/>
             </geometry>
         </visual>
     </link>
 
 
+    <joint name="wr_joint" type="continuous">
+        <parent link="base_link"/>
+        <child link="right_wheel"/>
+        <origin xyz="0.0 0.0 0.05"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+
+    <link name="right_wheel">
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <mass value="0.01" />
+            <inertia ixx="7.58333333333e-06" ixy="0.0" ixz="0.0" iyy="7.58333333333e-06" iyz="0.0" izz="1.25e-05"/>
+        </inertial>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="package://minichal1/robot_models/MCR2_1000_1_1_Wheel_Coupler_2.stl"/>
+            </geometry>
+        </collision>
+        <visual>
+            <origin rpy="1.57079632679 0 0" xyz="0.05 0.1 0"/>
+            <geometry>
+                <mesh filename="package://minichal1/robot_models/MCR2_1000_1_1_Wheel_Coupler_2.stl"/>
+            </geometry>
+        </visual>
+    </link>
+
+
+    <joint name="wl_joint" type="continuous">
+        <parent link="base_link"/>
+        <child link="left_wheel"/>
+        <origin xyz="0.0 0.0 0.05"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+
+    <link name="left_wheel">
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <mass value="0.01" />
+            <inertia ixx="7.58333333333e-06" ixy="0.0" ixz="0.0" iyy="7.58333333333e-06" iyz="0.0" izz="1.25e-05"/>
+        </inertial>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="package://minichal1/robot_models/MCR2_1000_1_1_Wheel_Coupler_2.stl"/>
+            </geometry>
+        </collision>
+        <visual>
+            <origin rpy="-1.57079632679 0 0" xyz="0.05 -0.1 0"/>
+            <geometry>
+                <mesh filename="package://minichal1/robot_models/MCR2_1000_1_1_Wheel_Coupler_2.stl"/>
+            </geometry>
+        </visual>
+    </link>
 
 </robot>
