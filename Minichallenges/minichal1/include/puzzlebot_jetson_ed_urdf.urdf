@@ -4,6 +4,8 @@
 
 <!-- Dummy link to fiz robot chassis -->
   <link name="base_link">  </link>
+  <link name="ref_r">  </link>
+  <link name="ref_l">  </link>
 
   
     <joint name="chassis_joint" type="fixed">
@@ -32,11 +34,24 @@
         </visual>
     </link>
 
+    <joint name="wr_joint_ref" type="fixed">
+            <parent link="chassis"/>
+            <child link="ref_r"/>
+            <origin xyz="0.0 0.0 0.05"/>
+            <!--<axis xyz="0 1 0"/>-->
+    </joint>
+
+    <joint name="wl_joint_ref" type="fixed">
+            <parent link="chassis"/>
+            <child link="ref_l"/>
+            <origin xyz="0.0 0.0 0.05"/>
+            <!-- <axis xyz="0 1 0"/> -->
+    </joint>
 
     <joint name="wr_joint" type="continuous">
-        <parent link="chassis"/>
+        <parent link="ref_r"/>
         <child link="right_wheel"/>
-        <origin xyz="0.0 0.0 0.05"/>
+        <origin xyz="0.0 0.0 0.0"/>
         <axis xyz="0 1 0"/>
     </joint>
 
@@ -64,7 +79,7 @@
     <joint name="wl_joint" type="continuous">
         <parent link="chassis"/>
         <child link="left_wheel"/>
-        <origin xyz="0.0 0.0 0.05"/>
+        <origin xyz="0.0 0.0 0.0"/>
         <axis xyz="0 1 0"/>
     </joint>
 
