@@ -27,7 +27,7 @@ class wheels_rotation:
         ###--- Variables Ruedas ---###
         self.wr = 0
         self.wl = 0
-        self.contJoints.header.frame_id = "base_link" 
+        self.contJoints.header.frame_id = "chassis" 
         self.contJoints.name.extend(["wl_joint", "wr_joint"]) 
         self.contJoints.position.extend([0.0, 0.0]) 
         self.contJoints.velocity.extend([0.0, 0.0]) 

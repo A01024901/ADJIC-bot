@@ -1,12 +1,7 @@
 <?xml version="1.0"?>
 <robot name="Puzzlebot Jetson-Lidar Ed.">
 
-
-<!-- Dummy link to fiz robot chassis -->
-  <link name="base_link">  </link>
-  <link name="ref_r">  </link>
-  <link name="ref_l">  </link>
-
+  <link name="base_link"/> 
   
     <joint name="chassis_joint" type="fixed">
         <parent link="base_link"/>
