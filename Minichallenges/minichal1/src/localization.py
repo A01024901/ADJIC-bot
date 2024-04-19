@@ -68,8 +68,8 @@ class localisation:
         #print (self.v , self.w , self.theta)
 
     def get_odom (self): 
-        self.odom.header.frame_id = "base_link"
-        self.odom.child_frame_id = "Origin2"
+        self.odom.header.frame_id = "odom"
+        #self.odom.child_frame_id = "Origin2"
         self.odom.pose.pose.position.x = self.x
         self.odom.pose.pose.position.y = self.y
 
@@ -82,7 +82,7 @@ class localisation:
     def get_transform(self, x, y, yaw):
             # Fill the transformation information 
             self.t.header.stamp = rospy.Time.now() 
-            self.t.header.frame_id = "base_link" 
+            self.t.header.frame_id = "odom" 
             self.t.child_frame_id = "chassis" 
             self.t.transform.translation.x = x 
             self.t.transform.translation.y = y 

@@ -2,10 +2,10 @@
 
 <robot name="Puzzlebot">
 
-    <link name="base_link"/> 
+    <link name="odom"/> 
   
     <joint name="chassis_joint" type="fixed">
-        <parent link="base_link"/>
+        <parent link="odom"/>
         <child link="chassis"/>
         <origin xyz="0.0 0.0 0.1"/>
     </joint>

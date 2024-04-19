@@ -67,7 +67,7 @@ class puzzlebot_kinemactic_model:
     def get_pose_stamped(self , x , y , yaw):
         ###--- Write Pose_stamped message ---###
         pose_stamped = PoseStamped()
-        pose_stamped.header.frame_id = "base_link"
+        pose_stamped.header.frame_id = "odom"
         pose_stamped.header.stamp = rospy.Time.now()
 
         ###--- Position ---###
