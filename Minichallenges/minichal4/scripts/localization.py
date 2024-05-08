@@ -28,6 +28,10 @@ class localisation:
         self.l = 0.19
         self.dt = 0.02
 
+        self.mu = np.array([[0.0 , 0.0 , 0.0]])
+        self.Q = np.array([[0.001 , 0.001 , 0.002] , [0.0001 , 0.002 , 0.0001] , [0.0002 , 0.0001 , 0.001]])
+        self.sigma = np.eye(3)
+
         ###--- Variables ---####
         self.w = 0.0
         self.wr = 0.0 
@@ -48,13 +52,21 @@ class localisation:
 
         while not rospy.is_shutdown():
             self.get_robot_velocities()
+
+
+            self.H = np.array([[1, 0, -self.dt * self.v * np.sin(self.theta[2,0])], [0, 1, self.dt * self.v * np.cos(self.theta[2,0])], [0, 0, 1]]) # Jacobian of the measurement model
+            self.mu = np.array([[self.mu[0] + self.dt * self.v * np.cos(self.mu[2,0])], [self.mu[1] + self.dt * self.v * np.sin(self.mu[2])], [self.mu[2] + self.v * self.w]]) # Prediction step
+            self.sigma = self.H.dot(self.sigma).dot(self.H.T) + self.Q # Covariance matrix update
+
             self.update_robot_pose()
             self.get_odom()
             self.get_transform(self.x, self.y, self.theta)
 
+    
             ###--- Publish ---###
             self.odom_pub.publish(self.odom)
             rate.sleep()
+
 
     def update_robot_pose(self):
         self.x = self.x + self.v * np.cos(self.theta) * self.dt   
@@ -79,7 +91,24 @@ class localisation:
         self.odom.pose.pose.orientation.z = quat[2]
         self.odom.pose.pose.orientation.w = quat[3]
 
-    def get_transform(self, x, y, yaw):
+        self.odom.twist.twist.linear.x = self.v
+        self.odom.twist.twist.angular.z = self.w
+
+        self.odom.pose.covariance = [0,0] * 36
+        self.odom.pose.covariance[0] = self.sigma[0],[0] * self.sigma[0][0]
+        self.odom.pose.covariance[1] = self.sigma[0][1]
+        self.odom.pose.covariance[5] = self.sigma[0][2]
+        self.odom.pose.covariance[6] = self.sigma[1][0]
+        self.odom.pose.covariance[7] = self.sigma[1][2]
+        self.odom.pose.covariance[11] = self.sigma[1][2]
+        self.odom.pose.covariance[30] = self.sigma[2][0]
+        self.odom.pose.covariance[31] = self.sigma[2][1]
+        self.odom.pose.covariance[35] = self.sigma[2][2] * self.sigma[2][2]
+        
+
+        self.odom_pub.publish(self.odom)
+
+    def get_transform(self, x, y, yaw, Sigma):
             # Fill the transformation information 
             self.t.header.stamp = rospy.Time.now() 
             self.t.header.frame_id = "odom" 
@@ -96,8 +125,10 @@ class localisation:
             self.t.transform.rotation.y = q[1] 
             self.t.transform.rotation.z = q[2] 
             self.t.transform.rotation.w = q[3] 
+
             # A transformation is broadcasted instead of published 
-            self.tf2_ros.sendTransform(self.t) #broadcast the transformation 
+            self.tf2_ros.sendTransform(self.t) #broadcast the transformation
+
         
     def wr_cb (self , msg):
         self.wr = msg.data
