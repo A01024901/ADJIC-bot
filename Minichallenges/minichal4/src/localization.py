@@ -2,9 +2,9 @@
 
 import rospy 
 import numpy as np
+from dead_reckoning_class import dead_reckoning
 from std_msgs.msg import Float32
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import TransformStamped
 from tf.transformations import quaternion_from_euler
 import tf2_ros #ROS package to work with transformations 
@@ -38,6 +38,7 @@ class localisation:
         self.theta = 0.0
         
         self.odom = Odometry()
+        self.covariance = dead_reckoning(self.dt)
         rate = rospy.Rate(int(1.0/self.dt))
         self.tf2_ros = tf2_ros.TransformBroadcaster() # Create a TransformBroadcaster object
         self.t = TransformStamped() # Create a TransformStamped object
@@ -47,9 +48,11 @@ class localisation:
         print("Nodo operando")
 
         while not rospy.is_shutdown():
+            cov_mat = self.covariance.calculate(self.v , self.w)
+
             self.get_robot_velocities()
             self.update_robot_pose()
-            self.get_odom()
+            self.get_odom(cov_mat)
             self.get_transform(self.x, self.y, self.theta)
 
             ###--- Publish ---###
@@ -67,7 +70,7 @@ class localisation:
         self.w = self.r * ((((2*self.v/self.r) - self.wl)-self.wl)/self.l)
         #print (self.v , self.w , self.theta)
 
-    def get_odom (self): 
+    def get_odom (self , cov_mat): 
         self.odom.header.frame_id = "odom"
         #self.odom.child_frame_id = "Origin2"
         self.odom.pose.pose.position.x = self.x
@@ -78,6 +81,12 @@ class localisation:
         self.odom.pose.pose.orientation.y = quat[1]
         self.odom.pose.pose.orientation.z = quat[2]
         self.odom.pose.pose.orientation.w = quat[3]
+
+        self.odom.pose.covariance = [0.0] * 36
+
+        self.odom.pose.covariance[0] = cov_mat[0][0] #Covariance in x
+        self.odom.pose.covariance[7] = cov_mat[1][1] #Covariance in y 
+        self.odom.pose.covariance[35] = cov_mat[2][2] #Covariance in y 
 
     def get_transform(self, x, y, yaw):
             # Fill the transformation information 
