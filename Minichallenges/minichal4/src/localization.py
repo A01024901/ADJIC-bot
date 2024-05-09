@@ -48,7 +48,9 @@ class localisation:
         print("Nodo operando")
 
         while not rospy.is_shutdown():
-            cov_mat = self.covariance.calculate(self.v , self.w)
+            cov_mat = self.covariance.calculate(self.v , self.w , self.wr , self.wl)
+
+            print(cov_mat)
 
             self.get_robot_velocities()
             self.update_robot_pose()
@@ -85,8 +87,14 @@ class localisation:
         self.odom.pose.covariance = [0.0] * 36
 
         self.odom.pose.covariance[0] = cov_mat[0][0] #Covariance in x
+        self.odom.pose.covariance[1] = cov_mat[0][1] #Covariance in xy 
+        self.odom.pose.covariance[5] = cov_mat[0][2] #Covariance in x theta
+        self.odom.pose.covariance[6] = cov_mat[1][0] #Covariance in y x
         self.odom.pose.covariance[7] = cov_mat[1][1] #Covariance in y 
-        self.odom.pose.covariance[35] = cov_mat[2][2] #Covariance in y 
+        self.odom.pose.covariance[11] = cov_mat[1][2] #Covariance in y theta
+        self.odom.pose.covariance[30] = cov_mat[2][0] #Covariance in theta x
+        self.odom.pose.covariance[31] = cov_mat[2][1] #Covariance in theta y
+        self.odom.pose.covariance[35] = cov_mat[2][2] #Covariance in theta
 
     def get_transform(self, x, y, yaw):
             # Fill the transformation information 

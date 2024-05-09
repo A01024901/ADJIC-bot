@@ -1,16 +1,25 @@
 import numpy as np
+np.set_printoptions(suppress = True) 
+np.set_printoptions(formatter = {'float': '{: 0.4f}'.format})
 
 class dead_reckoning:
     def __init__(self , dt):
-        np.set_printoptions(suppress = True) 
-        np.set_printoptions(formatter = {'float': '{: 0.4f}'.format})
+        ###--- Matrix init---###
         self.u = np.array([0 , 0 , 0])
         self.u_prev = np.array([0 , 0 , 0])
         self.e = np.array([[0 , 0 , 0] , [0 ,0 , 0] , [0 , 0 , 0]])
         self.e_prev = np.array([[0 , 0 , 0] , [0 ,0 , 0] , [0 , 0 , 0]])
-        self.q = np.array([[0.0002 , 0.0001 , 0.0001] , [0.0001 , 0.0005 , 0.0001] , [0.0001 , 0.0001 , 0.0002]])
-        self.dt = dt
+        self.q = np.array([[0 , 0 , 0] , [0 , 0 , 0] , [0 , 0 , 0]])
+        self.q = np.array([[0.0005 , 0.0001 , 0.001] , [0.001 , 0.0005 , 0.0001] , [0.0001 , 0.0001 , 0.0002]])
 
+        ###--- Constant Set ---###
+        self.dt = dt
+        self.r = 0.05
+        self.l = 0.19
+        self.lw = 0.0001
+        self.rw = 0.0001
+
+    ###--- Calc best estimated position ---###
     def estimated_pos (self , v , w):
         th = np.copy(self.u[2])
         u = np.array([self.u[0] + self.dt * v * np.cos(th) , 
@@ -18,6 +27,7 @@ class dead_reckoning:
                      self.u[2] + self.dt * w])
         self.u = np.copy(u)
         
+    ###--- Linearice model ---###
     def linearization (self , v ):
         th = np.copy(self.u_prev[2])
         print (th)
@@ -27,11 +37,14 @@ class dead_reckoning:
     
         self.h = np.copy(h)
 
+    ###--- Calculate uncertainty ---###
     def uncertainty (self):
         e = self.h.dot(self.e_prev).dot(self.h.T) + self.q
         self.e = np.copy(e)
 
-    def calculate (self , v , w):
+    ###--- Order of execution ---###
+    def calculate (self , v , w , wr , wl):
+        self.calcQ(v , w , wr , wl)
         self.estimated_pos(v , w)
         self.linearization(v)
         self.uncertainty()
@@ -40,5 +53,19 @@ class dead_reckoning:
 
         return self.e
     
-    def calcG
+    def calcQ (self , v , w , wr , wl):
+        th = np.copy(self.u_prev[2])
+        m = np.array([[self.rw * np.abs(wr) , 0] , 
+                      [0 , self.lw * np.abs(wl)]])
+        sigma = np.array([[np.cos(th) , np.cos(th)] ,
+                          [np.sin(th) , np.sin(th)] ,
+                          [2/self.l , -2/self.l]])
+        
+        calc = 0.5 * self.r * self.dt
+        sigma = sigma * calc
+
+        Q = sigma.dot(m).dot(sigma.T)
+
+        self.q = np.copy(Q)
+        
     
