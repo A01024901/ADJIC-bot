@@ -22,28 +22,34 @@ class test_mode:
 
         ###--- Objects ---###
         self.msg_linear = PoseArray()
+        self.msg_angular = PoseArray()
         linear = pd.read_csv(ruta + '/exp_lineares.csv')
         x_linear = linear["Xmedida"] #Variables lineales
         y_linear = linear["Ymedida"]
-        angulares = pd.read_csv(ruta + '/exp_lineares.csv')
+        angulares = pd.read_csv(ruta + '/exp_angulares.csv')
         ## Agraga el variables angulares
+        thetaexp = angulares["Angulos"]
 
          ###--- Robot Constants ---###
         self.dt = 0.02
 
         rate = rospy.Rate(int(1.0/self.dt))
 
-        while rospy.get_time() == 0: print ("Simulacion no iniciada")#Descomentar en simulacion 
+        while rospy.get_time() == 0: print ("Simulacion no iniciada") #Descomentar en simulacion 
 
         print("Simulacion operando")
 
         for i in range (50):
-            ###--- Linear ---###
+
+            ## LINEAR
             linear_pose = Pose()
             linear_pose.position.x = x_linear[i]
             linear_pose.position.y = y_linear[i]
             linear_pose.position.z = 0
-            theta = np.arctan((y_linear[i])/x_linear[i])
+            if x_linear[i] == 0:
+                theta = 0
+            else:
+                theta = np.arctan((y_linear[i])/x_linear[i])
             quat = quaternion_from_euler(0.0 , 0.0 ,theta)
             linear_pose.orientation.x = quat[0]
             linear_pose.orientation.y = quat[1]
@@ -53,16 +59,31 @@ class test_mode:
 
             self.msg_linear.poses.append(linear_pose)
 
-            ## Agraga el mensage angular 
+            ## ANGULAR
+            
+            angular_pose = Pose()
+            angular_pose.position.x = 0
+            angular_pose.position.y = 0
+            angular_pose.position.z = 0
+            theta = thetaexp[i]
+            quat = quaternion_from_euler(0.0 , 0.0 ,theta)
+            angular_pose.orientation.x = quat[0]
+            angular_pose.orientation.y = quat[1]
+            angular_pose.orientation.z = quat[2]
+            angular_pose.orientation.w = quat[3]
+
+            self.msg_angular.poses.append(angular_pose)
+
+        self.msg_angular.header.frame_id = 'odom'
+        self.msg_angular.header.stamp = rospy.Time.now()
 
         self.msg_linear.header.frame_id = 'odom'
         self.msg_linear.header.stamp = rospy.Time.now()    
-
-        ## Agraga el mensage angular         
+       
 
         while not rospy.is_shutdown():
             self.linear_pub.publish(self.msg_linear)
-            #Agrega angular pub
+            self.angular_pub.publish(self.msg_angular)
             rate.sleep()
 
 
