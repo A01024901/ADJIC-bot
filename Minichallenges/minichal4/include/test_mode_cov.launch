@@ -25,4 +25,7 @@
         <arg name="rvizconfig" default="$(find minichal4)/include/rviz/conf.rviz" />
         <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" /> 
 
+        <!--Test Mode-->
+        <node pkg="minichal4" type="graph_points.py" name="graphpoints" output="screen"/>
+
 </launch>
