@@ -10,14 +10,13 @@ class dead_reckoning:
         self.e = np.array([[0 , 0 , 0] , [0 ,0 , 0] , [0 , 0 , 0]])
         self.e_prev = np.array([[0 , 0 , 0] , [0 ,0 , 0] , [0 , 0 , 0]])
         self.q = np.array([[0 , 0 , 0] , [0 , 0 , 0] , [0 , 0 , 0]])
-        self.q = np.array([[0.0005 , 0.0001 , 0.001] , [0.001 , 0.0005 , 0.0001] , [0.0001 , 0.0001 , 0.0002]])
 
         ###--- Constant Set ---###
         self.dt = dt
         self.r = 0.05
         self.l = 0.19
-        self.lw = 0.0001
-        self.rw = 0.0001
+        self.lw = 1
+        self.rw = 1
 
     ###--- Calc best estimated position ---###
     def estimated_pos (self , v , w):

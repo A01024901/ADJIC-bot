@@ -74,7 +74,6 @@ class localisation:
 
     def get_odom (self , cov_mat): 
         self.odom.header.frame_id = "odom"
-        #self.odom.child_frame_id = "Origin2"
         self.odom.pose.pose.position.x = self.x
         self.odom.pose.pose.position.y = self.y
 
