@@ -28,7 +28,7 @@ class points:
         x_linear = linear["Xmedida"]
         y_linear = linear["Ymedida"]
         angulares = pd.read_csv(ruta + '/exp_angulares.csv')
-        theta_exp = angulares["Angulos"]
+        theta_exp = angulares["Angulo Medido"]
 
          ###--- Robot Constants ---###
         self.dt = 0.02
@@ -56,14 +56,12 @@ class points:
             linear_pose.orientation.w = 1.0
 
             self.msg_linear.poses.append(linear_pose)
-
-            ## ANGULAR
             
             angular_pose = Pose()
             angular_pose.position.x = 0
             angular_pose.position.y = 0
             angular_pose.position.z = 0
-            theta = theta_exp[i]
+            theta = np.deg2rad(theta_exp[i])
             quat = quaternion_from_euler(0.0 , 0.0 ,theta)
             angular_pose.orientation.x = quat[0]
             angular_pose.orientation.y = quat[1]

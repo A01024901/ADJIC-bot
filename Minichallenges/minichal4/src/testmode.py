@@ -50,7 +50,7 @@ class test_mode:
         exp_num = np.random.randint(0, 50)
         if ("a" in test.lower() and "g" in test.lower()):
             self.cmd_vel.linear.x = 0
-            self.cmd_vel.angular.z = np.deg2rad(float(self.velocidades_a[exp_num]))
+            self.cmd_vel.angular.z = float(self.velocidades_a[exp_num])
             self.cmd_vel_pub.publish(self.cmd_vel)
             time.sleep(float(self.duraciones_a[exp_num]))
             self.cmd_vel.linear.x = 0

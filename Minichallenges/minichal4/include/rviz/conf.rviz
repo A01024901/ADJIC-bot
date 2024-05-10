@@ -7,7 +7,6 @@ Panels:
         - /Global Options1
         - /TF1
         - /Odometry1
-        - /Odometry1/Shape1
       Splitter Ratio: 0.5
     Tree Height: 407
   - Class: rviz/Selection
@@ -120,7 +119,7 @@ Visualization Manager:
           Value: true
         Value: true
       Enabled: true
-      Keep: 1
+      Keep: 3
       Name: Odometry
       Position Tolerance: 0.10000000149011612
       Queue Size: 1
@@ -215,9 +214,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.8074113726615906
+      Pitch: 1.0324112176895142
       Target Frame: <Fixed Frame>
-      Yaw: 4.58500862121582
+      Yaw: 5.490025997161865
     Saved: ~
 Window Geometry:
   Displays:
