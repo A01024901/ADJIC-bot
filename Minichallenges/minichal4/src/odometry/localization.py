@@ -48,14 +48,11 @@ class localisation:
         print("Nodo operando")
 
         while not rospy.is_shutdown():
-            cov_mat = self.covariance.calculate(self.v , self.w , self.wr , self.wl)
-
-            print(cov_mat)
-
             self.get_robot_velocities()
             self.update_robot_pose()
-            self.get_odom(cov_mat)
             self.get_transform(self.x, self.y, self.theta)
+            cov_mat = self.covariance.calculate(self.v , self.w , self.wr , self.wl)
+            self.get_odom(cov_mat)
 
             ###--- Publish ---###
             self.odom_pub.publish(self.odom)
@@ -74,7 +71,7 @@ class localisation:
 
     def get_odom (self , cov_mat): 
         self.odom.header.frame_id = "odom"
-        self.odom.pose.pose.position.x = self.x + 0.1
+        self.odom.pose.pose.position.x = self.x #+ 0.1
         self.odom.pose.pose.position.y = self.y
 
         quat = quaternion_from_euler(0 , 0 , self.theta)
@@ -85,7 +82,7 @@ class localisation:
 
         self.odom.pose.covariance = [0.0] * 36
 
-        self.odom.pose.covariance[0] = cov_mat[0][0] * 15 #Covariance in x
+        self.odom.pose.covariance[0] = cov_mat[0][0] * 17 #Covariance in x
         self.odom.pose.covariance[1] = cov_mat[0][1] #Covariance in xy 
         self.odom.pose.covariance[5] = cov_mat[0][2] #Covariance in x theta
         self.odom.pose.covariance[6] = cov_mat[1][0] #Covariance in y x
@@ -93,7 +90,7 @@ class localisation:
         self.odom.pose.covariance[11] = cov_mat[1][2] #Covariance in y theta
         self.odom.pose.covariance[30] = cov_mat[2][0] #Covariance in theta x
         self.odom.pose.covariance[31] = cov_mat[2][1] #Covariance in theta y
-        self.odom.pose.covariance[35] = cov_mat[2][2] #Covariance in theta
+        self.odom.pose.covariance[35] = cov_mat[2][2] * 50 #Covariance in theta
 
     def get_transform(self, x, y, yaw):
             # Fill the transformation information 

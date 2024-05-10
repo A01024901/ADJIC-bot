@@ -25,10 +25,11 @@ class points:
         self.msg_linear = PoseArray()
         self.msg_angular = PoseArray()
         linear = pd.read_csv(ruta + '/exp_lineares.csv')
-        x_linear = linear["Xmedida"]
+        x_linear = linear["Xmedida"] - 0.1
         y_linear = linear["Ymedida"]
         angulares = pd.read_csv(ruta + '/exp_angulares.csv')
         theta_exp = angulares["Angulo Medido"]
+        theta_exp = theta_exp
 
          ###--- Robot Constants ---###
         self.dt = 0.02
@@ -58,7 +59,7 @@ class points:
             self.msg_linear.poses.append(linear_pose)
             
             angular_pose = Pose()
-            angular_pose.position.x = 0
+            angular_pose.position.x = 0.0
             angular_pose.position.y = 0
             angular_pose.position.z = 0
             theta = np.deg2rad(theta_exp[i])

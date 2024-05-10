@@ -5,7 +5,6 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /TF1
         - /Odometry1
       Splitter Ratio: 0.5
     Tree Height: 407
@@ -55,36 +54,45 @@ Visualization Manager:
     - Alpha: 1
       Class: rviz/RobotModel
       Collision Enabled: false
-      Enabled: false
+      Enabled: true
       Links:
         All Links Enabled: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        chassis:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        odom:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        right_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
       Update Interval: 0
-      Value: false
+      Value: true
       Visual Enabled: true
     - Class: rviz/TF
-      Enabled: true
+      Enabled: false
       Filter (blacklist): ""
       Filter (whitelist): ""
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        chassis:
-          Value: true
-        left_wheel:
-          Value: true
-        map:
-          Value: true
-        odom:
-          Value: true
-        right_wheel:
-          Value: true
       Marker Alpha: 1
       Marker Scale: 1
       Name: TF
@@ -92,15 +100,9 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Tree:
-        map:
-          odom:
-            chassis:
-              left_wheel:
-                {}
-              right_wheel:
-                {}
+        {}
       Update Interval: 0
-      Value: true
+      Value: false
     - Angle Tolerance: 0.10000000149011612
       Class: rviz/Odometry
       Covariance:
@@ -119,7 +121,7 @@ Visualization Manager:
           Value: true
         Value: true
       Enabled: true
-      Keep: 3
+      Keep: 1
       Name: Odometry
       Position Tolerance: 0.10000000149011612
       Queue Size: 1
@@ -198,7 +200,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 0.3427989184856415
+      Distance: 1.6368324756622314
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -206,17 +208,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0.988386332988739
-        Y: -0.00920259952545166
-        Z: 0.010792315006256104
+        X: 0.0486222505569458
+        Y: -0.04976093769073486
+        Z: 0.017007827758789062
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.0324112176895142
+      Pitch: 1.5147963762283325
       Target Frame: <Fixed Frame>
-      Yaw: 5.490025997161865
+      Yaw: 4.827480792999268
     Saved: ~
 Window Geometry:
   Displays:
