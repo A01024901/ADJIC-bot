@@ -25,6 +25,7 @@ class wheels_rotation:
         self.contJoints = JointState() 
         
         ###--- Variables Ruedas ---###
+        self.dt = 0.02
         self.wr = 0
         self.wl = 0
         self.contJoints.header.frame_id = "chassis" 
@@ -34,7 +35,7 @@ class wheels_rotation:
         self.contJoints.effort.extend([0.0, 0.0]) 
 
         ###--- Robot Pose ---###
-        rate = rospy.Rate(30)
+        rate = rospy.Rate(int(1.0/self.dt))
 
         print("Broadcast operando")
         print("Use rviz to see rotation")

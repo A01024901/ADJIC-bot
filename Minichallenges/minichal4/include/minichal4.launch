@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-        <!--Rviz-->
-        <include file="$(find minichal4)/include/rviz/rviz.launch"/> 
+        
 
         <!--Dependency nodes-->
         <include file="$(find minichal4)/include/nodes/nodes.launch"/> 
@@ -14,4 +13,7 @@
         
         <!--Test Mode-->
         <node pkg="minichal4" type="testmode.py" name="test_mode" output="screen"/>
+        
+        <!--Rviz-->
+        <include file="$(find minichal4)/include/rviz/rviz.launch"/> 
 </launch>

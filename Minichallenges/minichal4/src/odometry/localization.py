@@ -74,7 +74,7 @@ class localisation:
 
     def get_odom (self , cov_mat): 
         self.odom.header.frame_id = "odom"
-        self.odom.pose.pose.position.x = self.x
+        self.odom.pose.pose.position.x = self.x + 0.1
         self.odom.pose.pose.position.y = self.y
 
         quat = quaternion_from_euler(0 , 0 , self.theta)
@@ -85,7 +85,7 @@ class localisation:
 
         self.odom.pose.covariance = [0.0] * 36
 
-        self.odom.pose.covariance[0] = cov_mat[0][0] #Covariance in x
+        self.odom.pose.covariance[0] = cov_mat[0][0] * 15 #Covariance in x
         self.odom.pose.covariance[1] = cov_mat[0][1] #Covariance in xy 
         self.odom.pose.covariance[5] = cov_mat[0][2] #Covariance in x theta
         self.odom.pose.covariance[6] = cov_mat[1][0] #Covariance in y x

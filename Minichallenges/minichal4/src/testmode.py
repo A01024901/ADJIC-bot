@@ -10,14 +10,14 @@ from geometry_msgs.msg import Twist
 class test_mode:
     def __init__(self):
         ###--- Inicio del Nodo ---###
-        rospy.init_node('adjic_test_mode')
+        rospy.init_node('test_mode')
         rospy.on_shutdown(self.cleanup)
 
         ###--- Publishers ---###
         self.cmd_vel_pub = rospy.Publisher("/cmd_vel" , Twist , queue_size=1)
 
         ###--- Constants ---###
-        self.dt = 0.2
+        self.dt = 0.02
 
         ###--- Path ---###
         ruta = os.path.dirname(os.path.abspath(__file__))
@@ -56,7 +56,7 @@ class test_mode:
             self.cmd_vel.linear.x = 0
             self.cmd_vel.angular.z = 0
             self.cmd_vel_pub.publish(self.cmd_vel)
-            print("\n \n")
+            print("\n")
 
         elif ("e" in test.lower() and "i" in test.lower()):
             self.cmd_vel.linear.x = float(self.velocidades_l[exp_num])
@@ -66,13 +66,12 @@ class test_mode:
             self.cmd_vel.linear.x = 0
             self.cmd_vel.angular.z = 0
             self.cmd_vel_pub.publish(self.cmd_vel)
-            print("\n \n")
+            print("\n")
 
-    def cleanup (self):
+    def cleanup(self):
         print ("Apagando Simulacion")
-        self.cmd_vel.linear.x = 0
-        self.cmd_vel.angular.z = 0
-        self.cmd_vel_pub.publish(self.cmd_vel)
+        clean = Twist()
+        self.cmd_vel_pub.publish(clean)
         
 
 if __name__ == "__main__": 
