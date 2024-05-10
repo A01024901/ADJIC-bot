@@ -90,7 +90,7 @@ class localisation:
         self.odom.pose.covariance[11] = cov_mat[1][2] #Covariance in y theta
         self.odom.pose.covariance[30] = cov_mat[2][0] #Covariance in theta x
         self.odom.pose.covariance[31] = cov_mat[2][1] #Covariance in theta y
-        self.odom.pose.covariance[35] = cov_mat[2][2] * 50 #Covariance in theta
+        self.odom.pose.covariance[35] = cov_mat[2][2] * 5 #Covariance in theta
 
     def get_transform(self, x, y, yaw):
             # Fill the transformation information 

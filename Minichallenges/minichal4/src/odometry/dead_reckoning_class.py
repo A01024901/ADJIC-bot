@@ -15,8 +15,8 @@ class dead_reckoning:
         self.dt = dt
         self.r = 0.05
         self.l = 0.19
-        self.lw = 0.25
-        self.rw = 0.25
+        self.lw = 0.25 #KL
+        self.rw = 0.25 #KR
 
     ###--- Calc best estimated position ---###
     def estimated_pos (self , v , w):
