@@ -7,13 +7,14 @@ import pandas as pd
 from geometry_msgs.msg import Pose , PoseArray
 from tf.transformations import quaternion_from_euler
 
-class test_mode:
+class points:
     def __init__(self):
+        print("Puntos experimentales agregados \n\n")
         ###--- Inicio del Nodo ---###
         rospy.init_node('experimental_pub')
         rospy.on_shutdown(self.cleanup)
 
-        ###--- Subscriptores ---###
+        ###--- Path ---###
         ruta = os.path.dirname(os.path.abspath(__file__))
 
         ###--- Publishers ---###
@@ -24,20 +25,17 @@ class test_mode:
         self.msg_linear = PoseArray()
         self.msg_angular = PoseArray()
         linear = pd.read_csv(ruta + '/exp_lineares.csv')
-        x_linear = linear["Xmedida"] #Variables lineales
+        x_linear = linear["Xmedida"]
         y_linear = linear["Ymedida"]
         angulares = pd.read_csv(ruta + '/exp_angulares.csv')
-        ## Agraga el variables angulares
-        thetaexp = angulares["Angulos"]
+        theta_exp = angulares["Angulos"]
 
          ###--- Robot Constants ---###
         self.dt = 0.02
 
         rate = rospy.Rate(int(1.0/self.dt))
 
-        while rospy.get_time() == 0: print ("Simulacion no iniciada") #Descomentar en simulacion 
-
-        print("Simulacion operando")
+        #while rospy.get_time() == 0: print ("Simulacion no iniciada") #Descomentar en simulacion 
 
         for i in range (50):
 
@@ -65,7 +63,7 @@ class test_mode:
             angular_pose.position.x = 0
             angular_pose.position.y = 0
             angular_pose.position.z = 0
-            theta = thetaexp[i]
+            theta = theta_exp[i]
             quat = quaternion_from_euler(0.0 , 0.0 ,theta)
             angular_pose.orientation.x = quat[0]
             angular_pose.orientation.y = quat[1]
@@ -88,8 +86,8 @@ class test_mode:
 
 
     def cleanup (self):
-        print ("Apagando Simulacion")
+        print ("Quitando Puntos")
         
 
 if __name__ == "__main__": 
-    test_mode()
+    points()

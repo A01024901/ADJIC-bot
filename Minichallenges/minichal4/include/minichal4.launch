@@ -9,10 +9,9 @@
         <!--Robot description-->
         <include file="$(find minichal4)/include/robot/robot_desc.launch"/> 
 
-        <!--Test Mode-->
-        <node pkg="minichal4" type="testmode.py" name="test_mode" output="screen"/>
-
         <!--Experimental Points Mode-->
         <node pkg="minichal4" type="graph_points.py" name="graphpoints" output="screen"/>
-
+        
+        <!--Test Mode-->
+        <node pkg="minichal4" type="testmode.py" name="test_mode" output="screen"/>
 </launch>

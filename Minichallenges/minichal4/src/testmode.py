@@ -2,12 +2,10 @@
 
 import rospy 
 import numpy as np
+import os
 import time
-import math
+import pandas as pd
 from geometry_msgs.msg import Twist
-from geometry_msgs.msg import PoseStamped
-from std_msgs.msg import Float32
-from tf.transformations import quaternion_from_euler
 
 class test_mode:
     def __init__(self):
@@ -15,28 +13,23 @@ class test_mode:
         rospy.init_node('adjic_test_mode')
         rospy.on_shutdown(self.cleanup)
 
-        print("\n \n")
-
-        ###--- Subscriptores ---###
-        #rospy.Subscriber("/cmd_vel" , Twist , self.vel_cb)
-
         ###--- Publishers ---###
-        self.pose_pub = rospy.Publisher("pose_sim" , PoseStamped , queue_size=1)
         self.cmd_vel_pub = rospy.Publisher("/cmd_vel" , Twist , queue_size=1)
-        self.wr_pub = rospy.Publisher("wr" , Float32 , queue_size=1)
-        self.wl_pub = rospy.Publisher("wl" , Float32 , queue_size=1)
 
         ###--- Constants ---###
         self.dt = 0.2
 
-        ###--- Variables ---####
-        self.flag = False
+        ###--- Path ---###
+        ruta = os.path.dirname(os.path.abspath(__file__))
 
-        self.l_vel = 0.0
-        self.w_vel = 0.0 
-        self.t = 0.0
-        self.angle = 0.0
-        self.pos = 0.0 
+        ###--- Objetos ---####
+        linear = pd.read_csv(ruta + '/experimentation/exp_lineares.csv')
+        self.velocidades_l = linear["Velocidad"]
+        self.duraciones_l = linear["Tiempo"]
+        angulares = pd.read_csv(ruta + '/experimentation/exp_angulares.csv')
+        #Cambiar el nombre del topico a Grados en vez de R/S
+        self.velocidades_a = angulares["R/S"]
+        self.duraciones_a = angulares["Tiempo"]
 
         rate = rospy.Rate(int(1.0/self.dt))
 
@@ -48,35 +41,32 @@ class test_mode:
 
         while not rospy.is_shutdown():
             
-            self.test_pose()
+            self.testmode()
             
             rate.sleep()
 
-    def test_pose (self):
-        self.l_vel = float(input("Dame la velocidad lineal (m/s): "))
-        deg_per_sec = float(input("Dame la velocidad angular(g/s): "))
-        self.w_vel = math.radians(deg_per_sec)
-        self.t = float(input("Dame la duracion en segundos: "))
-        x = (self.l_vel * self.t) * np.cos(self.w_vel * self.t)
-        y = (self.l_vel * self.t) * np.sin(self.w_vel * self.t)
-        theta = self.w_vel * self.t
-        print(f"Linear: {self.l_vel}  Angular: {self.w_vel} Time: {self.t}", (self.l_vel , self.w_vel , self.t))
-        print(f" Pos X: {x} Pos Y: {y} Theta: {theta}. Estas seguro?(t/f)", (x , y , theta))
-        flag = input("Estas seguro?(t/f)")
-        if ("t" in flag.lower()):
-            self.cmd_vel.linear.x = self.l_vel
-            self.cmd_vel.angular.z = self.w_vel
+    def testmode(self):
+        test = (input("Deseas probar velocidad angular o lineal: "))
+        exp_num = np.random.randint(0, 50)
+        if ("a" in test.lower() and "g" in test.lower()):
+            self.cmd_vel.linear.x = 0
+            self.cmd_vel.angular.z = np.deg2rad(float(self.velocidades_a[exp_num]))
             self.cmd_vel_pub.publish(self.cmd_vel)
-            time.sleep(self.t)
+            time.sleep(float(self.duraciones_a[exp_num]))
             self.cmd_vel.linear.x = 0
             self.cmd_vel.angular.z = 0
             self.cmd_vel_pub.publish(self.cmd_vel)
             print("\n \n")
 
-        else: pass
-
-        
-
+        elif ("e" in test.lower() and "i" in test.lower()):
+            self.cmd_vel.linear.x = float(self.velocidades_l[exp_num])
+            self.cmd_vel.angular.z = 0
+            self.cmd_vel_pub.publish(self.cmd_vel)
+            time.sleep(float(self.duraciones_l[exp_num]))
+            self.cmd_vel.linear.x = 0
+            self.cmd_vel.angular.z = 0
+            self.cmd_vel_pub.publish(self.cmd_vel)
+            print("\n \n")
 
     def cleanup (self):
         print ("Apagando Simulacion")
