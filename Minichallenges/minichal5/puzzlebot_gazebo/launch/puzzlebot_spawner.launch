@@ -19,7 +19,6 @@
     
   <!--Load robot description-->
   <param name="/$(arg robot)/robot_description" command="$(find xacro)/xacro '$(find puzzlebot_description)/urdf/$(arg robot_description_file)' prefix:=$(arg robot)" />
-
   <group ns="$(arg robot)">
   
     <!--Robot State Publisher-->
