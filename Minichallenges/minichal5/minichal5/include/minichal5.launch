@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
     <launch>
         <!-- Worlds -->
-        <arg name="world_name" default="$(find puzzlebot_gazebo)/worlds/obstacle_avoidance_1.world"/> 
+        <arg name="world_name" default="$(find puzzlebot_gazebo)/worlds/obstacle_avoidance_4.world"/> 
         <!--<arg name="world_name" default="$(find puzzlebot_gazebo)/worlds/obstacle_avoidance_2.world"/> -->
         <!--<arg name="world_name" default="$(find puzzlebot_gazebo)/worlds/obstacle_avoidance_3.world"/> -->
         <!--<arg name="world_name" default="$(find puzzlebot_gazebo)/worlds/obstacle_avoidance_4.world"/> -->
@@ -19,7 +19,7 @@
         <!--<include file="$(find minichal5)/include/rviz/rviz.launch"/> -->
 
         <!--Minichalenge Nodes-->
-        <node pkg="minichal5" type="state_machine.py" name="state_machine" output="screen"/>
+        <!--<node pkg="minichal5" type="state_machine.py" name="state_machine" output="screen"/>-->
         <!--<node pkg="minichal5" type="go_to_goal.py" name="go_to_goal" />-->
         <!--<node pkg="minichal5" type="avoid_obstacle.py" name="follow_walls"/>-->
 

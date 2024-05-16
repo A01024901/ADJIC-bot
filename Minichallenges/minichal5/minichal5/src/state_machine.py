@@ -60,11 +60,13 @@ class state_machine:
             rate.sleep()
 
     def hold_behave(self):
-        if self.pos[0][0] != self.pos[1][0] and self.pos[0][1] != self.pos[1][1]:
+        if self.pos[0] != self.pos[2] and self.pos[1] != self.pos[3]:
             self.state = "go_to_goal"
 
     def gtg_behave(self):
         self.cmd_vel = self.gtg_vel
+        if self.pos[0] != self.pos[2] and self.pos[1] != self.pos[3]:
+            self.state = "stop"
 
     def follow_wall_behave(self):
         self.cmd_vel = self.fw_vel

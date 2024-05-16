@@ -12,13 +12,13 @@ from tf.transformations import quaternion_from_euler
 class GoToGoal:  
     def __init__(self):  
         ###--- Inicio del Nodo ---###
-        rospy.init_node('state_machine')
+        rospy.init_node('go_to_goal')
         rospy.on_shutdown(self.cleanup)
 
         ###--- Subscriptores ---###
         rospy.Subscriber("/puzzlebot_1/wl", Float32, self.wl_cb)  
         rospy.Subscriber("/puzzlebot_1/wr", Float32, self.wr_cb)
-        rospy.Subscriber("targer", Float32MultiArray, self.wr_cb)  
+        #rospy.Subscriber("target", Float32MultiArray, self.wr_cb)  
 
         ###--- Publishers ---###
         self.pub_cmd_vel = rospy.Publisher('gtg_twist', Twist, queue_size=1)  
@@ -37,8 +37,8 @@ class GoToGoal:
         ###--- Variables ---###
         self.x_pos = 0.0 
         self.y_pos = 0.0
-        self.x_target = 0.0 
-        self.y_target = 0.0 
+        self.x_target = 2.0 
+        self.y_target = 2.0 
         self.angle = 0.0
         self.wl = 0.0 
         self.wr = 0.0
@@ -53,7 +53,7 @@ class GoToGoal:
             self.fill_messages(v , w)
 
             self.pub_cmd_vel.publish(self.v_msg) #publish the robot's speed  
-            self.pos_pub.publish(self.pose) #publish the robot's speed  
+            #self.pos_pub.publish(self.pose) #publish the robot's speed  
             rate.sleep() 
 
     def calc_pos(self):
@@ -94,15 +94,15 @@ class GoToGoal:
             v = 0 #linear speed 
         else:
             # Make the linear speed gain proportional to the distance to the target position
-            kv = kvmax*(1-np.exp(-av*ed**2))/abs(ed) #Constant to change the speed 
-            v = kv*ed #linear speed 
+            kv = kvmax * (1 - np.exp(-av * ed **2))/abs(ed) #Constant to change the speed 
+            v = kv * ed #linear speed 
 
         return v , w
     
     def fill_messages(self , v , w ) :
         self.v_msg.linear.x = v
         self.v_msg.angular.z = w
-        self.pose.data = [[self.x_pos , self.y_pos] , [self.x_target , self.y_target]]
+        self.pose.data = [self.x_pos , self.y_pos , self.x_target , self.y_target]
 
     def wl_cb(self, wl):  
         self.wl = wl.data 
@@ -110,9 +110,9 @@ class GoToGoal:
     def wr_cb(self, wr): 
         self.wr = wr.data
 
-    def target_cb(self , target):
-        self.x_target = target.data[0]
-        self.y_target = target.data[1]   
+    #def target_cb(self , target):
+    #    self.x_target = target.data[0]
+    #    self.y_target = target.data[1]   
 
     def cleanup(self):  
         vel_msg = Twist() 
