@@ -3,7 +3,7 @@ import rospy
 import numpy as np 
 from geometry_msgs.msg import Twist 
 from std_msgs.msg import Float32 
-from std_msgs.msg import Float32MultiArray
+from geometry_msgs.msg import PoseStamped
 from tf.transformations import quaternion_from_euler
 
 
@@ -18,11 +18,12 @@ class GoToGoal:
         ###--- Subscriptores ---###
         rospy.Subscriber("/puzzlebot_1/wl", Float32, self.wl_cb)  
         rospy.Subscriber("/puzzlebot_1/wr", Float32, self.wr_cb)
-        #rospy.Subscriber("target", Float32MultiArray, self.wr_cb)  
+        #rospy.Subscriber("target", PoseStamped, self.wr_cb)  
 
         ###--- Publishers ---###
         self.pub_cmd_vel = rospy.Publisher('gtg_twist', Twist, queue_size=1)  
-        self.pos_pub = rospy.Publisher('pos_gtg', Float32MultiArray, queue_size=1)
+        self.pos_pub = rospy.Publisher('pos_gtg', PoseStamped, queue_size=1)
+        self.pos_t_pub = rospy.Publisher('target_gtg', PoseStamped, queue_size=1)
 
         ###--- Constants ---###
         self.dt = 0.02
@@ -30,7 +31,8 @@ class GoToGoal:
         self.L = 0.19 #wheel separation [m] 
 
         ###--- Objetos ---###
-        self.pose = Float32MultiArray()
+        self.pose = PoseStamped()
+        self.pose_target = PoseStamped()
         self.v_msg = Twist() 
         rate = rospy.Rate(int(1.0/self.dt))
 
@@ -53,7 +55,9 @@ class GoToGoal:
             self.fill_messages(v , w)
 
             self.pub_cmd_vel.publish(self.v_msg) #publish the robot's speed  
-            #self.pos_pub.publish(self.pose) #publish the robot's speed  
+            self.pos_pub.publish(self.pose) #publish robot position
+            self.pos_t_pub.publish(self.pose_target) #Publish target position
+
             rate.sleep() 
 
     def calc_pos(self):
@@ -102,7 +106,10 @@ class GoToGoal:
     def fill_messages(self , v , w ) :
         self.v_msg.linear.x = v
         self.v_msg.angular.z = w
-        self.pose.data = [self.x_pos , self.y_pos , self.x_target , self.y_target]
+        self.pose.pose.position.x = self.x_pos
+        self.pose.pose.position.y = self.y_pos
+        self.pose_target.pose.position.x = self.x_target
+        self.pose_target.pose.position.y = self.y_target
 
     def wl_cb(self, wl):  
         self.wl = wl.data 
