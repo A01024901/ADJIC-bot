@@ -105,6 +105,7 @@ class state_machine:
 
     def stop_behave(self):
         self.cmd_vel = Twist()
+        self.state = "on_hold"
 
     def gtg_cb(self , twist):
         self.gtg_vel = twist

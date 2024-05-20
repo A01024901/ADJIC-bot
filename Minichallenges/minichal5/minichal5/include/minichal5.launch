@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
     <launch>
+        <!-- World Number -->
+        <arg name="world_number" default="1"/>
+
         <!-- Worlds -->
-        <arg name="world_name" default="$(find puzzlebot_gazebo)/worlds/obstacle_avoidance_4.world"/> 
-        <!--<arg name="world_name" default="$(find puzzlebot_gazebo)/worlds/obstacle_avoidance_2.world"/> -->
-        <!--<arg name="world_name" default="$(find puzzlebot_gazebo)/worlds/obstacle_avoidance_3.world"/> -->
-        <!--<arg name="world_name" default="$(find puzzlebot_gazebo)/worlds/obstacle_avoidance_4.world"/> -->
+        <arg name="world_name" default="$(find puzzlebot_gazebo)/worlds/obstacle_avoidance_$(arg world_number).world"/>
 
         <!-- GUI-->
         <arg name="gui" default="true"/>
@@ -15,13 +15,10 @@
             <arg name="gui" value="$(arg gui)" />
         </include>
 
-        <!--Rviz-->
-        <!--<include file="$(find minichal5)/include/rviz/rviz.launch"/> -->
-
         <!--Minichalenge Nodes-->
         <node pkg="minichal5" type="state_machine.py" name="state_machine" output="screen"/>
         <node pkg="minichal5" type="localization.py" name="odom" />
         <node pkg="minichal5" type="go_to_goal.py" name="go_to_goal" />
-        <!--<node pkg="minichal5" type="avoid_obstacle.py" name="follow_walls"/>-->
+        <!--<node pkg="minichal5" type="bug2.py" name="follow_walls"/>-->
 
     </launch>

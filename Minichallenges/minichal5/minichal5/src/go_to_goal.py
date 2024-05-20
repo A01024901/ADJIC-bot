@@ -14,7 +14,7 @@ class GoToGoal:
 
         ###--- Subscriptores ---###
         rospy.Subscriber("odom", Odometry, self.odom_cb)  
-        #rospy.Subscriber("target", PoseStamped, self.wr_cb)  
+        #rospy.Subscriber("target", PoseStamped, self.target_cb)  
 
         ###--- Publishers ---###
         self.pub_cmd_vel = rospy.Publisher('gtg_twist', Twist, queue_size=1)  
@@ -23,15 +23,13 @@ class GoToGoal:
         self.at_goal_flag_pub = rospy.Publisher('at_goal_flag', Bool, queue_size=1)
 
         ###--- Constants ---###
-        self.dt = 0.02
-        self.r = 0.05 #wheel radius [m] 
-        self.L = 0.19 #wheel separation [m] 
+        positions = [[] , [] , [] , []]
 
         ###--- Objetos ---###
         self.flag_msg = Bool()
         self.pose = PoseStamped()
         self.pose_target = PoseStamped()
-        self.v_msg = Twist() 
+        self.v_msg = Twist()
         rate = rospy.Rate(int(1.0/self.dt))
 
         ###--- Variables ---###
@@ -111,9 +109,9 @@ class GoToGoal:
         self.x_pos = msg.pose.pose.position.x
         self.y_pos = msg.pose.pose.position.y
     
-    #def target_cb(self , target):
-    #    self.x_target = target.data[0]
-    #    self.y_target = target.data[1]   
+    def target_cb(self , target):
+        self.x_target = target.pose.position.x 
+        self.y_target = target.pose.position.y
 
     def cleanup(self):  
         vel_msg = Twist() 
