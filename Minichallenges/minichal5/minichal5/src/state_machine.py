@@ -3,6 +3,7 @@
 import rospy 
 import numpy as np
 from std_msgs.msg import Bool
+from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import PoseStamped
 
@@ -15,6 +16,7 @@ class state_machine:
         ###--- Subscriptores  GTG---###
         rospy.Subscriber("gtg_twist" , Twist , self.gtg_cb)
         rospy.Subscriber("pos_gtg" , PoseStamped , self.pos_gtg_cb)
+        rospy.Subscriber("target_gtg" , PoseStamped , self.target_gtg_cb)
         rospy.Subscriber("at_goal_flag" , Bool , self.flag_gtg_cb)
 
         ###-- Subscriptores FW ---###
@@ -112,6 +114,10 @@ class state_machine:
     def pos_gtg_cb(self , msg):
         self.x_pos = msg.pose.position.x 
         self.y_pos = msg.pose.position.y
+
+    def target_gtg_cb(self , msg):
+        self.x_goal = msg.pose.position.x 
+        self.y_goal = msg.pose.position.y
 
     def flag_gtg_cb(self , msg):
         self.gtg_flag = msg.data

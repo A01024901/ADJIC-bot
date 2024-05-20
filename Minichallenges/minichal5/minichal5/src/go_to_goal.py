@@ -2,6 +2,7 @@
 import rospy  
 import numpy as np 
 from geometry_msgs.msg import Twist 
+from nav_msgs.msg import Odometry
 from std_msgs.msg import Float32 
 from std_msgs.msg import Bool
 from geometry_msgs.msg import PoseStamped
@@ -13,9 +14,7 @@ class GoToGoal:
         rospy.on_shutdown(self.cleanup)
 
         ###--- Subscriptores ---###
-        rospy.Subscriber("/odom", Float32, self.wl_cb)  
-        rospy.Subscriber("/puzzlebot_1/wl", Float32, self.wl_cb)  
-        rospy.Subscriber("/puzzlebot_1/wr", Float32, self.wr_cb)
+        rospy.Subscriber("odom", Odometry, self.odom_cb)  
         #rospy.Subscriber("target", PoseStamped, self.wr_cb)  
 
         ###--- Publishers ---###
@@ -40,18 +39,15 @@ class GoToGoal:
         self.at_goal_flag = False
         self.x_pos = 0.0 
         self.y_pos = 0.0
-        self.x_target = 0.7
-        self.y_target = 0.7 
+        self.x_target = 5
+        self.y_target = 0.
         self.angle = 0.0
-        self.wl = 0.0 
-        self.wr = 0.0
 
         while rospy.get_time() == 0: print ("Simulacion no iniciada") #Descomentar en simulacion 
 
         self.t_ant = rospy.get_time() #Valor para obtener dt 
 
         while not rospy.is_shutdown(): 
-            self.calc_pos()
             v , w = self.calc_gtg()
             self.at_goal()
             self.fill_messages(v , w)
@@ -63,20 +59,8 @@ class GoToGoal:
             
             rate.sleep() 
 
-    def calc_pos(self):
-        dt = rospy.get_time() - self.t_ant
-        self.t_ant = rospy.get_time()
-
-        v = self.r * (self.wr - self.wl)/2 #Velocidad linear
-        w = self.r * (self.wr - self.wl)/self.L   #Velocidad angular 
-
-        self.angle = self.angle + w * dt #Theta 
-        self.angle = np.arctan2(np.sin(self.angle) , np.cos(self.angle))
-        self.x_pos = self.x_pos + v * dt * np.cos(self.angle) #Posicion en X
-        self.y_pos = self.y_pos + v * dt * np.sin(self.angle) #Posicion en Y
-
     def calc_gtg (self):
-        kvmax = 0.9 #0.17 #linear speed maximum gain 
+        kvmax = 0.17 #0.17 #linear speed maximum gain 
         kwmax = 0.8#0.8 #angular angular speed maximum gain
         
         av = 2.0 #Constant to adjust the exponential's growth rate  
@@ -102,7 +86,7 @@ class GoToGoal:
         else:
             # Make the linear speed gain proportional to the distance to the target position
             kv = kvmax * (1 - np.exp(-av * ed **2))/abs(ed) #Constant to change the speed 
-            v = kv * ed #linear speed 
+            v = kv * ed #linear speed
 
         return v , w
     
@@ -124,12 +108,10 @@ class GoToGoal:
 
         self.flag_msg.data = self.at_goal_flag
 
-    def wl_cb(self, wl):  
-        self.wl = wl.data 
-
-    def wr_cb(self, wr): 
-        self.wr = wr.data
-
+    def odom_cb(self , msg):
+        self.x_pos = msg.pose.pose.position.x
+        self.y_pos = msg.pose.pose.position.y
+    
     #def target_cb(self , target):
     #    self.x_target = target.data[0]
     #    self.y_target = target.data[1]   
