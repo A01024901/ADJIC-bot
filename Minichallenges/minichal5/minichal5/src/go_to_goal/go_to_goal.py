@@ -14,7 +14,6 @@ class GoToGoal:
 
         ###--- Subscriptores ---###
         rospy.Subscriber("odom", Odometry, self.odom_cb)  
-        #rospy.Subscriber("target", PoseStamped, self.target_cb)  
 
         ###--- Publishers ---###
         self.pub_cmd_vel = rospy.Publisher('gtg_twist', Twist, queue_size=1)  
@@ -23,7 +22,10 @@ class GoToGoal:
         self.at_goal_flag_pub = rospy.Publisher('at_goal_flag', Bool, queue_size=1)
 
         ###--- Constants ---###
-        positions = [[] , [] , [] , []]
+        map = rospy.get_param('world_number', 1)
+        positions = [[0.75 , -0.5] , [0.5 , -3.25] , [4.5,-2.25] , [4.5,-2.25]]
+        self.x_target = positions[map][0]
+        self.y_target = positions[map][1]
 
         ###--- Objetos ---###
         self.flag_msg = Bool()
@@ -36,8 +38,6 @@ class GoToGoal:
         self.at_goal_flag = False
         self.x_pos = 0.0 
         self.y_pos = 0.0
-        self.x_target = 5
-        self.y_target = 1
         self.angle = 0.0
 
         while rospy.get_time() == 0: print ("Simulacion no iniciada") #Descomentar en simulacion 
@@ -108,10 +108,6 @@ class GoToGoal:
     def odom_cb(self , msg):
         self.x_pos = msg.pose.pose.position.x
         self.y_pos = msg.pose.pose.position.y
-    
-    def target_cb(self , target):
-        self.x_target = target.pose.position.x 
-        self.y_target = target.pose.position.y
 
     def cleanup(self):  
         vel_msg = Twist() 

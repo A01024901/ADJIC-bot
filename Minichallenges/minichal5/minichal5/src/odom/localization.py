@@ -54,8 +54,6 @@ class localisation:
             cov_mat = self.covariance.calculate(self.v , self.w , self.wr , self.wl)
             self.get_odom(cov_mat)
 
-            print("X_pos: " , self.x , "Y_Pos: " , self.y)
-
             ###--- Publish ---###
             self.odom_pub.publish(self.odom)
             rate.sleep()
