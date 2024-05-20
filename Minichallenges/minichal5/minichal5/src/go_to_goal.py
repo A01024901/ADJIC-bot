@@ -3,7 +3,6 @@ import rospy
 import numpy as np 
 from geometry_msgs.msg import Twist 
 from nav_msgs.msg import Odometry
-from std_msgs.msg import Float32 
 from std_msgs.msg import Bool
 from geometry_msgs.msg import PoseStamped
 
@@ -40,7 +39,7 @@ class GoToGoal:
         self.x_pos = 0.0 
         self.y_pos = 0.0
         self.x_target = 5
-        self.y_target = 0.
+        self.y_target = 1
         self.angle = 0.0
 
         while rospy.get_time() == 0: print ("Simulacion no iniciada") #Descomentar en simulacion 

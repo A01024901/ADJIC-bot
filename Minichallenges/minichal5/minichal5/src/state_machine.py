@@ -1,9 +1,7 @@
 #!/usr/bin/env python3 
-
 import rospy 
 import numpy as np
 from std_msgs.msg import Bool
-from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import PoseStamped
 
@@ -130,8 +128,6 @@ class state_machine:
 
     def cleanup (self):
         print ("Apagando Localsation")
-        
-        
 
 if __name__ == "__main__": 
     state_machine()
