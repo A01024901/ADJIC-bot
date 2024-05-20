@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="puzzlebot">
+
+    <xacro:property name="cdeg" value="1.57" /> <!-- Turn 90 deg -->
+
+    <xacro:property name="constant" value="0.083" /> <!-- 1/12 -->
+    <xacro:property name="mass" value="0.710" />
+    <xacro:property name="width" value="0.29" />
+    <xacro:property name="height" value="0.29" />
+    <xacro:property name="depth" value="0.17" />
+
+    <link name="base_link">
+        <pose>0 0 0 0 0 0</pose>
+    </link>
+
+    <joint name="base_joint" type="fixed">
+        <origin xyz="0.0 0.0 0.05" rpy="0.0 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="chassis"/>
+        <axis xyz="0.0 0.0 1.0"/> 
+    </joint>
+
+    <!-- ROBOT CHASSIS-->
+    <link name="chassis">
+        <!-- <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="${cdeg} 0.0 ${cdeg}"/>
+            <mass value="1.0"/>
+            <inertia ixx="${constant * mass * (height*height + depth*depth) }" ixy="0.0" ixz="0.0" 
+                     iyy="${constant * mass * (width*width + height*height) }" iyz="0.0" 
+                     izz="${constant * mass * (width*width + depth*depth) }"/>
+        </inertial> -->
+
+        <visual name="">
+            <origin xyz="0.0 0.0 0.0" rpy="${cdeg} 0.0 ${cdeg}"/>
+            <geometry>
+                <mesh filename="package://puzzlebot_rviz/meshes/chassis.stl" scale="1 1 1"/>
+            </geometry>
+            <material name="red">
+                <color rgba="1.0 0.0 0.0 1.0"/>
+                <texture filename=""/>
+            </material>
+        </visual>
+
+        <!-- <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="${cdeg} 0.0 ${cdeg}"/>
+            <geometry>
+                <mesh filename="package://puzzlebot_rviz/meshes/chassis.stl" scale="1 1 1"/>
+            </geometry>
+        </collision> -->
+    </link>
+
+    <!-- ROBOT WHEELS -->
+    <xacro:macro name="wheel" params="name x y deg">
+        <link name="wheel_${name}_link">
+            <!-- <inertial>
+                <mass value="0.5"/>
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 ${cdeg} ${deg}"/>
+                <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
+            </inertial> -->
+
+            <visual>
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 ${cdeg} ${deg}"/>
+                <geometry>
+                     <mesh filename="package://puzzlebot_rviz/meshes/wheel_coupler.stl" scale="1 1 1"/>
+                </geometry>
+                <material name="blue">
+                    <color rgba="0.0 0.0 1.0 1.0"/>
+                    <texture filename=""/>
+                </material>
+            </visual>
+
+            <collision>
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 ${cdeg} ${deg}"/>
+                <geometry>
+                    <mesh filename="package://puzzlebot_rviz/meshes/wheel_coupler.stl" scale="1 1 1"/>
+                </geometry>
+            </collision>
+        </link>
+
+        <joint name="wheel_${name}_joint" type="continuous">
+            <origin xyz="${x} ${y} 0.0" rpy="0.0 0.0 0.0"/>
+            <parent link="chassis"/>
+            <child link="wheel_${name}_link"/>
+            <axis xyz="0.0 0.0 1.0"/>
+        </joint>
+    </xacro:macro>
+
+    <xacro:wheel name="right" x="0.052" y="0.098"  deg="-1.57" />
+    <xacro:wheel name="left"  x="0.052" y="-0.098" deg="1.57"  />
+
+</robot>

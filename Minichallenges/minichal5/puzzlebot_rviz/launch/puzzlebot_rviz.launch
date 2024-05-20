@@ -1,0 +1,8 @@
+<!-- This launch file will read a urdf model and publish it using xacro--> 
+<launch> 
+  <arg name="model" default="$(find puzzlebot_rviz)/urdf/puzzlebot.urdf.xacro"/> 
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model)" /> 
+  <node name="puzzlebot_kinematic" pkg="puzzlebot_sim" type="puzzlebot_kinematic_model.py" /> 
+  <node name="puzzlebot_odom" pkg="puzzlebot_rviz" type="puzzlebot_tf_broadcaster.py" /> 
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find puzzlebot_rviz)/config/config.rviz"/>
+</launch>
