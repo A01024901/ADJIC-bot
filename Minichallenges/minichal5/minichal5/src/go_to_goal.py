@@ -3,11 +3,8 @@ import rospy
 import numpy as np 
 from geometry_msgs.msg import Twist 
 from std_msgs.msg import Float32 
+from std_msgs.msg import Bool
 from geometry_msgs.msg import PoseStamped
-from tf.transformations import quaternion_from_euler
-
-
-#This class will make the puzzlebot move following a square 
 
 class GoToGoal:  
     def __init__(self):  
@@ -24,6 +21,7 @@ class GoToGoal:
         self.pub_cmd_vel = rospy.Publisher('gtg_twist', Twist, queue_size=1)  
         self.pos_pub = rospy.Publisher('pos_gtg', PoseStamped, queue_size=1)
         self.pos_t_pub = rospy.Publisher('target_gtg', PoseStamped, queue_size=1)
+        self.at_goal_flag_pub = rospy.Publisher('at_goal_flag', Bool, queue_size=1)
 
         ###--- Constants ---###
         self.dt = 0.02
@@ -31,12 +29,14 @@ class GoToGoal:
         self.L = 0.19 #wheel separation [m] 
 
         ###--- Objetos ---###
+        self.flag_msg = Bool()
         self.pose = PoseStamped()
         self.pose_target = PoseStamped()
         self.v_msg = Twist() 
         rate = rospy.Rate(int(1.0/self.dt))
 
         ###--- Variables ---###
+        self.at_goal_flag = False
         self.x_pos = 0.0 
         self.y_pos = 0.0
         self.x_target = 2.0 
@@ -52,12 +52,14 @@ class GoToGoal:
         while not rospy.is_shutdown(): 
             self.calc_pos()
             v , w = self.calc_gtg()
+            self.at_goal()
             self.fill_messages(v , w)
 
             self.pub_cmd_vel.publish(self.v_msg) #publish the robot's speed  
             self.pos_pub.publish(self.pose) #publish robot position
             self.pos_t_pub.publish(self.pose_target) #Publish target position
-
+            self.at_goal_flag_pub.publish(self.flag_msg) #Publish flag
+            
             rate.sleep() 
 
     def calc_pos(self):
@@ -103,6 +105,14 @@ class GoToGoal:
 
         return v , w
     
+    def at_goal(self):
+        x_window = np.arange(self.x_target - 0.05, self.x_target + 0.05, 0.01)
+        y_window = np.arange(self.y_target - 0.05, self.y_target + 0.05, 0.01)
+        if round(self.x_pos , 2) in x_window and round(self.y_pos , 2) in y_window:
+            self.at_goal_flag = True
+
+        else: self.at_goal_flag = False
+    
     def fill_messages(self , v , w ) :
         self.v_msg.linear.x = v
         self.v_msg.angular.z = w
@@ -110,6 +120,8 @@ class GoToGoal:
         self.pose.pose.position.y = self.y_pos
         self.pose_target.pose.position.x = self.x_target
         self.pose_target.pose.position.y = self.y_target
+
+        self.flag_msg.data = self.at_goal_flag
 
     def wl_cb(self, wl):  
         self.wl = wl.data 

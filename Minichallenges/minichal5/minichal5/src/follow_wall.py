@@ -7,9 +7,6 @@ from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 from tf.transformations import quaternion_from_euler
 
-np.set_printoptions(suppress = True)
-np.set_printoptions(formatter = {'float':'{: 0.4f}'.format})
-
 class PublishOdomCov:
     def __init__(self):
         ###--- Inicio del Nodo ---###
@@ -21,6 +18,7 @@ class PublishOdomCov:
 
         ###--- Publishers ---###
         self.pub_cmd_vel = rospy.Publisher('gtg_twist', Twist, queue_size=1) 
+        self.pub_flag_front = rospy.Publisher('front_object', Twist, queue_size=1) 
 
         ###--- Constants ---###
         self.dt = 0.02

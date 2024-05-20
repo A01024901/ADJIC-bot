@@ -19,8 +19,8 @@
         <!--<include file="$(find minichal5)/include/rviz/rviz.launch"/> -->
 
         <!--Minichalenge Nodes-->
-        <!--<node pkg="minichal5" type="state_machine.py" name="state_machine" output="screen"/>-->
-        <!--<node pkg="minichal5" type="go_to_goal.py" name="go_to_goal" />-->
+        <node pkg="minichal5" type="state_machine.py" name="state_machine" output="screen"/>
+        <node pkg="minichal5" type="go_to_goal.py" name="go_to_goal" />
         <!--<node pkg="minichal5" type="avoid_obstacle.py" name="follow_walls"/>-->
 
     </launch>
