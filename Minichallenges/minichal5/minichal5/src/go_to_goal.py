@@ -13,6 +13,7 @@ class GoToGoal:
         rospy.on_shutdown(self.cleanup)
 
         ###--- Subscriptores ---###
+        rospy.Subscriber("/odom", Float32, self.wl_cb)  
         rospy.Subscriber("/puzzlebot_1/wl", Float32, self.wl_cb)  
         rospy.Subscriber("/puzzlebot_1/wr", Float32, self.wr_cb)
         #rospy.Subscriber("target", PoseStamped, self.wr_cb)  
@@ -39,8 +40,8 @@ class GoToGoal:
         self.at_goal_flag = False
         self.x_pos = 0.0 
         self.y_pos = 0.0
-        self.x_target = 2.0 
-        self.y_target = 2.0 
+        self.x_target = 0.7
+        self.y_target = 0.7 
         self.angle = 0.0
         self.wl = 0.0 
         self.wr = 0.0
@@ -75,7 +76,7 @@ class GoToGoal:
         self.y_pos = self.y_pos + v * dt * np.sin(self.angle) #Posicion en Y
 
     def calc_gtg (self):
-        kvmax = 0.16 #0.17 #linear speed maximum gain 
+        kvmax = 0.9 #0.17 #linear speed maximum gain 
         kwmax = 0.8#0.8 #angular angular speed maximum gain
         
         av = 2.0 #Constant to adjust the exponential's growth rate  
@@ -106,9 +107,9 @@ class GoToGoal:
         return v , w
     
     def at_goal(self):
-        x_window = np.arange(self.x_target - 0.05, self.x_target + 0.05, 0.01)
-        y_window = np.arange(self.y_target - 0.05, self.y_target + 0.05, 0.01)
-        if round(self.x_pos , 2) in x_window and round(self.y_pos , 2) in y_window:
+        x_window = self.x_pos < (self.x_target + 0.1) and self.x_pos > (self.x_target - 0.1)
+        y_window = self.y_pos < (self.y_target + 0.1) and self.y_pos > (self.y_target - 0.1)
+        if x_window and y_window:
             self.at_goal_flag = True
 
         else: self.at_goal_flag = False
