@@ -36,7 +36,6 @@ class follow_walls:
         self.x_pos = 0
         self.y_pos = 0
         
-
         while rospy.get_time() == 0: print ("Simulacion no iniciada") 
 
         while not rospy.is_shutdown():

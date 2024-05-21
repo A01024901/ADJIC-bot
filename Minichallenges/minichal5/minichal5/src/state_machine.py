@@ -57,8 +57,7 @@ class state_machine:
                 self.hold_behave()
 
             if self.state == "go_to_goal":
-                print ("Go to goal" , "X:" , self.x_pos , "Y:" , self.y_pos)
-                print ("Go to goal" , "XP:" , self.x_goal , "YP:" , self.y_goal)
+                
                 self.gtg_behave()
 
             elif self.state == "follow_wall":
@@ -86,6 +85,9 @@ class state_machine:
             self.state = "follow_wall"
             self.x_temp = self.x_pos
             self.y_temp = self.y_pos
+        
+        #print ("Go to goal" , "X:" , self.x_pos , "Y:" , self.y_pos)
+        #print ("Go to goal" , "v:" , self.gtg_vel.linear.x , "w:" , self.gtg_vel.angular.z)
 
     def follow_wall_behave(self):
         self.cmd_vel = self.fw_vel

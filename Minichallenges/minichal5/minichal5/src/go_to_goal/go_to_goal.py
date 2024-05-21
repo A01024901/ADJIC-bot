@@ -1,6 +1,7 @@
 #!/usr/bin/env python 
 import rospy  
 import numpy as np 
+import tf.transformations as tf
 from geometry_msgs.msg import Twist 
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Bool
@@ -22,10 +23,12 @@ class GoToGoal:
         self.at_goal_flag_pub = rospy.Publisher('at_goal_flag', Bool, queue_size=1)
 
         ###--- Constants ---###
-        map = rospy.get_param('world_number', 1)
+        self.dt = 0.02
+        map = int(rospy.get_param('world_number', "1"))
         positions = [[0.75 , -0.5] , [0.5 , -3.25] , [4.5,-2.25] , [4.5,-2.25]]
         self.x_target = positions[map][0]
         self.y_target = positions[map][1]
+        
 
         ###--- Objetos ---###
         self.flag_msg = Bool()
@@ -38,7 +41,7 @@ class GoToGoal:
         self.at_goal_flag = False
         self.x_pos = 0.0 
         self.y_pos = 0.0
-        self.angle = 0.0
+        self.theta_robot = 0.0
 
         while rospy.get_time() == 0: print ("Simulacion no iniciada") #Descomentar en simulacion 
 
@@ -65,7 +68,7 @@ class GoToGoal:
         ed = np.sqrt((self.x_target - self.x_pos)**2+(self.y_target - self.y_pos)**2)
         #Compute angle to the target position
         theta_target=np.arctan2(self.y_target - self.y_pos , self.x_target - self.x_pos)
-        e_theta = theta_target - self.angle
+        e_theta = theta_target - self.theta_robot
 
         #limit e_theta from -pi to pi
         #This part is very important to avoid abrupt changes when error switches between 0 and +-2pi
@@ -108,6 +111,11 @@ class GoToGoal:
     def odom_cb(self , msg):
         self.x_pos = msg.pose.pose.position.x
         self.y_pos = msg.pose.pose.position.y
+        x = msg.pose.pose.orientation.x
+        y = msg.pose.pose.orientation.y
+        z = msg.pose.pose.orientation.z
+        w = msg.pose.pose.orientation.w
+        _ , _ , self.theta_robot = tf.euler_from_quaternion([x , y , z ,w])
 
     def cleanup(self):  
         vel_msg = Twist() 
