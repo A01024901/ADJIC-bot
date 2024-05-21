@@ -124,7 +124,7 @@ class state_machine:
         print("Position x: " , round(self.x_pos , 3) , "Target x: " , self.x_goal)
         print("Position y: " , round(self.y_pos , 3) , "Target y: " , self.y_goal)
         print("Temp x: " , round(self.x_temp , 3) , "Temp y: " , round(self.y_temp , 3))
-        print("DistanceF: " , self.calc_distance() , "Object: " , self.object_front , "Clear: " , self.clear_path)
+        print("GTGF: " , self.gtg_flag , "Object: " , self.object_front , "Clear: " , self.clear_path)
         print("###############################")
 
     def gtg_cb(self , twist):

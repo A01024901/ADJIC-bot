@@ -6,6 +6,7 @@ from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Bool
 from geometry_msgs.msg import PoseStamped
+from tf.transformations import quaternion_from_euler
 
 class GoToGoal:  
     def __init__(self):  
@@ -93,11 +94,14 @@ class GoToGoal:
     
     def at_goal(self):
         x_window = self.x_pos < (self.x_target + 0.1) and self.x_pos > (self.x_target - 0.1)
+        x_window =  self.x_target - 0.1 < self.x_pos < self.x_target + 0.1
         y_window = self.y_pos < (self.y_target + 0.1) and self.y_pos > (self.y_target - 0.1)
         if x_window and y_window:
             self.at_goal_flag = True
 
         else: self.at_goal_flag = False
+
+        print (self.at_goal_flag)
     
     def fill_messages(self , v , w ) :
         self.v_msg.linear.x = v
@@ -106,6 +110,12 @@ class GoToGoal:
         self.pose.pose.position.y = self.y_pos
         self.pose_target.pose.position.x = self.x_target
         self.pose_target.pose.position.y = self.y_target
+
+        quat = quaternion_from_euler(0 , 0 , self.theta_robot)
+        self.pose.pose.orientation.x = quat[0]
+        self.pose.pose.orientation.y = quat[1]
+        self.pose.pose.orientation.z = quat[2]
+        self.pose.pose.orientation.w = quat[3]
 
         self.flag_msg.data = self.at_goal_flag
 
@@ -117,6 +127,7 @@ class GoToGoal:
         z = msg.pose.pose.orientation.z
         w = msg.pose.pose.orientation.w
         _ , _ , self.theta_robot = tf.euler_from_quaternion([x , y , z ,w])
+
 
     def cleanup(self):  
         vel_msg = Twist() 
