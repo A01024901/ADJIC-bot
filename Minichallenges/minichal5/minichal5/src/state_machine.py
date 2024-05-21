@@ -23,6 +23,7 @@ class state_machine:
 
         ###--- Publishers ---###
         self.cmd_vel_pub = rospy.Publisher("puzzlebot_1/base_controller/cmd_vel" , Twist , queue_size=1)
+        self.clear_flag = rospy.Publisher("clear_obstacle" , Bool , queue_size=1)
 
         ###--- Compare ---###
         self.x_pos = 0
@@ -56,7 +57,7 @@ class state_machine:
                 print ("On_hold")   
                 self.hold_behave()
 
-            if self.state == "go_to_goal":
+            elif self.state == "go_to_goal":
                 print ("Go to goal")   
                 self.gtg_behave()
 
@@ -79,6 +80,7 @@ class state_machine:
 
     def gtg_behave(self):
         self.cmd_vel = self.gtg_vel
+        print(not self.gtg_flag , self.object_front)
         if self.gtg_flag:
             self.state = "stop"
         elif (not self.gtg_flag) and self.object_front:

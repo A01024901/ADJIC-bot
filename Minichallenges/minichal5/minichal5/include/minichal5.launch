@@ -8,7 +8,7 @@
         <arg name="world_name" default="$(find puzzlebot_gazebo)/worlds/obstacle_avoidance_$(arg world_number).world"/>
 
         <!-- GUI-->
-        <arg name="gui" default="true"/>
+        <arg name="gui" default="false"/>
 
         <!--Gazebo sim-->
         <include file="$(find puzzlebot_gazebo)/launch/puzzlebot_gazebo.launch">

@@ -56,7 +56,8 @@ class follow_walls:
                 index = self.scan.ranges.index(closest_distance)
                 closest_angle = self.scan.angle_min + index * self.scan.angle_increment
                 closest_angle = np.arctan2(np.sin(closest_angle), np.cos(closest_angle))  
-                self.crash_state = self.eval_conditions(closest_distance , closest_angle)
+                self.eval_conditions(closest_distance , closest_angle)
+                
                 self.object_flag.data = self.crash_state
 
                 self.th_goal = np.arctan2((self.y_goal - self.x_pos), (self.x_goal - self.y_pos))
@@ -64,7 +65,7 @@ class follow_walls:
                 rot = self.eval_rotation(closest_distance , closest_angle)
 
                 state = self.safe_zone(closest_distance , closest_angle)
-                print (state)
+                print (closest_distance)
 
                 if self.safe_zone(closest_distance , closest_angle):
                     print("Safe_Zone")
@@ -81,8 +82,8 @@ class follow_walls:
     def eval_conditions(self , distance , angle):
         distance = distance <= self.follow_distance
         angle = angle > -np.pi/4 and angle < np.pi/4
-        if distance and angle: return True
-        else: return False
+        if distance and angle: 
+            self.crash_state = True
 
     def safe_zone(self , distance , angle):
         distance = distance <= self.safe_distance
@@ -100,7 +101,6 @@ class follow_walls:
     def calc_fw(self , cw_b , closest_angle):
         print ("Follow W")
         fw_th = (np.pi / 2) + closest_angle if cw_b else -(np.pi / 2) + closest_angle
-
         if (-0.08 > fw_th > 0.08) and self.crash_state :
             v_AO = 0.0
             w_AO = self.k_w_AO * fw_th
