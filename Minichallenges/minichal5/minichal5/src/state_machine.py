@@ -48,7 +48,7 @@ class state_machine:
         self.fw_vel = Twist()
         rate = rospy.Rate(int(1.0/self.dt))
 
-        while rospy.get_time() == 0: print ("Simulacion no iniciada") #Descomentar en simulacion 
+        while rospy.get_time() == 0: pass #Descomentar en simulacion 
 
         print("Nodo operando")
 
@@ -87,16 +87,14 @@ class state_machine:
             self.state = "follow_wall"
             self.x_temp = self.x_pos
             self.y_temp = self.y_pos
-        
-        #print ("Go to goal" , "X:" , self.x_pos , "Y:" , self.y_pos)
-        #print ("Go to goal" , "v:" , self.gtg_vel.linear.x , "w:" , self.gtg_vel.angular.z)
 
     def follow_wall_behave(self):
         self.cmd_vel = self.fw_vel
+        print("Vel_received" , self.fw_vel.linear.x , self.fw_vel.angular.z)
         if self.gtg_flag:
             self.state = "stop"
 
-        elif self.calc_distance():
+        elif self.calc_distance() and not self.object_front:
             self.state = "go_to_goal"
 
     def calc_distance(self):

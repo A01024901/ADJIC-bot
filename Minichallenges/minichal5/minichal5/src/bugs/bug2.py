@@ -19,14 +19,14 @@ class follow_walls:
         rospy.Subscriber("target_gtg" , PoseStamped , self.target_gtg_cb)
 
         ###--- Publishers ---###
-        self.pub_cmd_vel = rospy.Publisher('gtg_twist', Twist, queue_size=1) 
+        self.pub_cmd_vel = rospy.Publisher('fw_twist', Twist, queue_size=1) 
         self.pub_flag_front = rospy.Publisher('front_object', Bool, queue_size=1) 
 
         ###--- Constants ---###
-        self.follow_distance = 0.23
+        self.follow_distance = 0.25
         self.safe_distance = 0.07
         self.dt = 0.02
-        self.k_w_AO = 0.2
+        self.k_w_AO = 0.4
         self.k_w_C_AO = 2.8
         self.v_C_AO = 0.15
 
@@ -46,7 +46,7 @@ class follow_walls:
         self.y_goal = 0
         self.th_goal = 0
 
-        while rospy.get_time() == 0: print ("Simulacion no iniciada") 
+        while rospy.get_time() == 0: pass 
 
         while not rospy.is_shutdown():
             if self.scan.ranges:
@@ -99,7 +99,7 @@ class follow_walls:
             return False # = Clock Wise
         
     def calc_fw(self , cw_b , closest_angle):
-        print ("Follow W")
+        #print ("Follow W")
         fw_th = (np.pi / 2) + closest_angle if cw_b else -(np.pi / 2) + closest_angle
         if (-0.08 > fw_th > 0.08) and self.crash_state :
             v_AO = 0.0
@@ -110,6 +110,7 @@ class follow_walls:
 
         self.cmd_vel.linear.x = v_AO
         self.cmd_vel.angular.z = w_AO
+        print ("Calc_vel: " ,v_AO , w_AO)
 
 
     def wl_cb (self , msg):
