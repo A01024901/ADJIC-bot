@@ -24,7 +24,7 @@ class follow_walls:
         self.pub_flag_clear = rospy.Publisher('front_clear', Bool, queue_size=1) 
 
         ###--- Constants ---###
-        self.follow_distance = 0.25
+        self.follow_distance = 0.17
         self.safe_distance = 0.07
         self.dt = 0.02
         self.k_w_AO = 0.4
@@ -88,6 +88,8 @@ class follow_walls:
         if distance and angle: 
             self.crash_state = True
 
+        #else: self.crash_state = False
+
     def safe_zone(self , distance , angle):
         distance = distance <= self.safe_distance
         angle = angle > -np.pi/4 and angle < np.pi/4
@@ -142,6 +144,7 @@ class follow_walls:
     def target_gtg_cb(self , msg):
         self.x_goal = msg.pose.position.x 
         self.y_goal = msg.pose.position.y
+
     def laser_cb (self , msg):
         self.scan = msg
         data = msg.ranges

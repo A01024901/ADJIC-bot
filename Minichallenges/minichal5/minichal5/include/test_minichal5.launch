@@ -17,6 +17,6 @@
         </include>
 
         <!--Minichalenge Nodes-->
-        <node pkg="minichal5" type="bug_$(arg bug_number).py" name="follow_walls" output="screen"/>
+        <node pkg="minichal5" type="bug2_and.py" name="follow_walls" output="screen"/>
 
     </launch>

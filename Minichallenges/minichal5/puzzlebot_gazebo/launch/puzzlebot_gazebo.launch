@@ -16,8 +16,8 @@
         <arg name="use_sim_time" default="true"/>
         <arg name="headless" default="false"/>
         <arg name="debug" default="false"/>
-        <arg name="world_name"/>
-        <arg name="gui"/>
+        <arg name="world_name" default="$(find puzzlebot_gazebo)/worlds/obstacle_avoidance_4.world"/>
+        <arg name="gui" default="true"/>
 
         <!-- Launch Gazebo -->
         <include file="$(find gazebo_ros)/launch/empty_world.launch">
