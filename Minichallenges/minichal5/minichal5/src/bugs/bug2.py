@@ -21,6 +21,7 @@ class follow_walls:
         ###--- Publishers ---###
         self.pub_cmd_vel = rospy.Publisher('fw_twist', Twist, queue_size=1) 
         self.pub_flag_front = rospy.Publisher('front_object', Bool, queue_size=1) 
+        self.pub_flag_clear = rospy.Publisher('front_clear', Bool, queue_size=1) 
 
         ###--- Constants ---###
         self.follow_distance = 0.25
@@ -34,6 +35,7 @@ class follow_walls:
         self.cmd_vel = Twist() 
         self.scan = LaserScan()
         self.object_flag = Bool()
+        self.clear_flag = Bool()
         rate = rospy.Rate(int(1.0/self.dt))
 
         ###--- Variables ---###
@@ -77,6 +79,7 @@ class follow_walls:
             ###--- Publish ---###
             self.pub_cmd_vel.publish(self.cmd_vel)
             self.pub_flag_front.publish(self.object_flag)
+            self.pub_flag_clear.publish(self.clear_flag)
             rate.sleep()
 
     def eval_conditions(self , distance , angle):
@@ -113,9 +116,21 @@ class follow_walls:
         print ("Calc_vel: " ,v_AO , w_AO)
 
     def clear_path(self):
-        data = self.scan.ranges
-        ranges = np.roll(data, int(len(data)/2 + 1))   
-
+        angle_to_goal = np.arctan2((self.y_goal - self.y_pos), (self.x_goal - self.x_pos))
+        
+        # Normalizar el ángulo
+        angle_to_goal = np.arctan2(np.sin(angle_to_goal), np.cos(angle_to_goal))
+        
+        # Calcular el índice del LIDAR correspondiente al ángulo hacia el objetivo
+        index_goal_angle = int((angle_to_goal - self.scan.angle_min) / self.scan.angle_increment)
+        
+        # Verificar si el índice está dentro del rango del LIDAR
+        if 0 <= index_goal_angle < len(self.scan.ranges):
+            # Verificar si la distancia medida en esa dirección es mayor que la distancia al objetivo
+            distance_to_goal = np.sqrt((self.x_goal - self.x_pos)**2 + (self.y_goal - self.y_pos)**2)
+            if self.scan.ranges[index_goal_angle] > distance_to_goal:
+                self.clear_flag.data = True
+        self.clear_flag.data = False
 
     def wl_cb (self , msg):
         self.wl = msg.data

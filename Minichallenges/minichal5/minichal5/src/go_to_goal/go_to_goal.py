@@ -24,7 +24,8 @@ class GoToGoal:
 
         ###--- Constants ---###
         self.dt = 0.02
-        map = int(rospy.get_param('world_number', "1"))
+        map = int(rospy.get_param('world_number' , "1"))
+        print (map)
         positions = [[0.75 , -0.5] , [0.5 , -3.25] , [4.5,-2.25] , [4.5,-2.25]]
         positions = [[1.0 , -0.5] , [0.30 , -3.25] , [4.75,-2.25] , [4.75,-2.25]]
         self.x_target = positions[map][0]

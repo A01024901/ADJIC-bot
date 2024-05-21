@@ -23,6 +23,7 @@ class state_machine:
         ###-- Subscriptores FW ---###
         rospy.Subscriber("fw_twist" , Twist , self.fw_cb)
         rospy.Subscriber("front_object" , Bool , self.fw_f_cb)
+        rospy.Subscriber("front_clear" , Bool , self.fw_clear_cb)
 
         ###--- Publishers ---###
         self.cmd_vel_pub = rospy.Publisher("puzzlebot_1/base_controller/cmd_vel" , Twist , queue_size=1)
@@ -39,6 +40,7 @@ class state_machine:
         ###--- Variables ---###
         self.gtg_flag = False
         self.object_front = False
+        self.clear_path = False
         self.pos = 0
         self.state = "go_to_goal" #"avoid_obstacle" "Stop"
 
@@ -99,13 +101,15 @@ class state_machine:
         if self.gtg_flag:
             self.state = "stop"
 
-        elif self.calc_distance() and not self.object_front:
+        elif self.calc_distance() and (not self.object_front or self.clear_path):
             self.state = "go_to_goal"
 
     def calc_distance(self):
         distance_temp = np.sqrt((self.x_goal - self.x_temp)**2 + (self.y_goal - self.y_temp)**2)
         distance_real = np.sqrt((self.x_goal - self.x_pos)**2 + (self.y_goal - self.y_pos)**2)
-        if distance_real < distance_temp: 
+        distance = distance_real < distance_temp
+        #align = 
+        if distance: 
             return True
         else: 
             return False
@@ -120,7 +124,7 @@ class state_machine:
         print("Position x: " , round(self.x_pos , 3) , "Target x: " , self.x_goal)
         print("Position y: " , round(self.y_pos , 3) , "Target y: " , self.y_goal)
         print("Temp x: " , round(self.x_temp , 3) , "Temp y: " , round(self.y_temp , 3))
-        print("DistanceF: " , self.calc_distance() , "Object: " , self.object_front)
+        print("DistanceF: " , self.calc_distance() , "Object: " , self.object_front , "Clear: " , self.clear_path)
         print("###############################")
 
     def gtg_cb(self , twist):
@@ -139,6 +143,9 @@ class state_machine:
 
     def fw_cb(self , twist):
         self.fw_vel = twist   
+    
+    def fw_clear_cb(self , msg):
+        self.clear_path = msg.data  
     
     def fw_f_cb(self , msg):
         self.object_front = msg.data   
