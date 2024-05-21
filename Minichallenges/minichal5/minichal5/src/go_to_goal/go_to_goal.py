@@ -16,6 +16,7 @@ class GoToGoal:
 
         ###--- Subscriptores ---###
         rospy.Subscriber("odom", Odometry, self.odom_cb)  
+        rospy.Subscriber("front_clear", Bool, self.front_clear_cb)
 
         ###--- Publishers ---###
         self.pub_cmd_vel = rospy.Publisher('gtg_twist', Twist, queue_size=1)  
@@ -40,72 +41,75 @@ class GoToGoal:
         rate = rospy.Rate(int(1.0/self.dt))
 
         ###--- Variables ---###
+        self.state = "go_to_goal"
         self.at_goal_flag = False
         self.x_pos = 0.0 
         self.y_pos = 0.0
         self.theta_robot = 0.0
+        self.clear_path = False
 
         while rospy.get_time() == 0: pass #Descomentar en simulacion 
 
         self.t_ant = rospy.get_time() #Valor para obtener dt 
 
         while not rospy.is_shutdown(): 
-            v , w = self.calc_gtg()
-            self.at_goal()
-            self.fill_messages(v , w)
+            if self.state == "go_to_goal":
+                v, w = self.calc_gtg()
+                self.at_goal()
+                self.fill_messages(v, w)
+            elif self.state == "follow_walls":
+                v, w = self.follow_walls_behave()
 
-            self.pub_cmd_vel.publish(self.v_msg) #publish the robot's speed  
-            self.pos_pub.publish(self.pose) #publish robot position
-            self.pos_t_pub.publish(self.pose_target) #Publish target position
-            self.at_goal_flag_pub.publish(self.flag_msg) #Publish flag
-            
+            self.check_state_transition()
+
+            self.pub_cmd_vel.publish(self.v_msg) 
+            self.pos_pub.publish(self.pose)
+            self.pos_t_pub.publish(self.pose_target)
+            self.at_goal_flag_pub.publish(self.flag_msg)
             rate.sleep() 
 
     def calc_gtg (self):
-        kvmax = 0.17 #0.17 #linear speed maximum gain 
-        kwmax = 0.8#0.8 #angular angular speed maximum gain
-        
-        av = 2.0 #Constant to adjust the exponential's growth rate  
-        aw = 2.0 #Constant to adjust the exponential's growth rate
+        kvmax = 0.17
+        kwmax = 0.8
+        av = 2.0
+        aw = 2.0
         ed = np.sqrt((self.x_target - self.x_pos)**2+(self.y_target - self.y_pos)**2)
-        #Compute angle to the target position
-        theta_target=np.arctan2(self.y_target - self.y_pos , self.x_target - self.x_pos)
+        theta_target = np.arctan2(self.y_target - self.y_pos , self.x_target - self.x_pos)
         e_theta = theta_target - self.theta_robot
-
-        #limit e_theta from -pi to pi
-        #This part is very important to avoid abrupt changes when error switches between 0 and +-2pi
         e_theta = np.arctan2(np.sin(e_theta), np.cos(e_theta))
 
-        #Compute the robot's angular speed
         if e_theta != 0:
-            kw = kwmax * (1 - np.exp(-aw * e_theta **2))/abs(e_theta) #Constant to change the speed 
+            kw = kwmax * (1 - np.exp(-aw * e_theta **2))/abs(e_theta)
         else:
-            kw = 0.05#0.08 #0.05
+            kw = 0.05
         w = kw * e_theta
         if abs(e_theta) > np.pi/8:
-            #we first turn to the goal
-            v = 0 #linear speed 
+            v = 0
         else:
-            # Make the linear speed gain proportional to the distance to the target position
-            kv = kvmax * (1 - np.exp(-av * ed **2))/abs(ed) #Constant to change the speed 
-            v = kv * ed #linear speed
+            kv = kvmax * (1 - np.exp(-av * ed **2))/abs(ed)
+            v = kv * ed
 
-        return v , w
+        return v, w
     
+    def follow_walls_behave(self):
+        # Aquí implementa la lógica para seguir las paredes
+        v = 0.0
+        w = 0.0
+        return v, w
+
+    def check_state_transition(self):
+        if self.state == "go_to_goal" and self.at_goal_flag:
+            self.state = "follow_walls"
+        elif self.state == "follow_walls" and self.clear_path:
+            self.state = "go_to_goal"
+
     def at_goal(self):
         tolerance = 0.1
-        x_window = self.x_pos < (self.x_target + 0.1) and self.x_pos > (self.x_target - 0.1)
-        x_window =  self.x_target - tolerance < self.x_pos < self.x_target + tolerance
-        y_window = self.y_pos < (self.y_target + 0.1) and self.y_pos > (self.y_target - 0.1)
-        y_window = self.y_target - 0.1 < self.y_pos < self.y_target + 0.1 
-        if x_window and y_window:
-            self.at_goal_flag = True
+        x_window = self.x_target - tolerance < self.x_pos < self.x_target + tolerance
+        y_window = self.y_target - tolerance < self.y_pos < self.y_target + tolerance 
+        self.at_goal_flag = x_window and y_window
 
-        else: self.at_goal_flag = False
-
-        print (x_window , y_window)
-    
-    def fill_messages(self , v , w ) :
+    def fill_messages(self, v, w):
         self.v_msg.linear.x = v
         self.v_msg.angular.z = w
         self.pose.pose.position.x = self.x_pos
@@ -121,7 +125,7 @@ class GoToGoal:
 
         self.flag_msg.data = self.at_goal_flag
 
-    def odom_cb(self , msg):
+    def odom_cb(self, msg):
         self.x_pos = msg.pose.pose.position.x
         self.y_pos = msg.pose.pose.position.y
         x = msg.pose.pose.orientation.x
@@ -130,10 +134,13 @@ class GoToGoal:
         w = msg.pose.pose.orientation.w
         _ , _ , self.theta_robot = tf.euler_from_quaternion([x , y , z ,w])
 
+    def front_clear_cb(self, msg):
+        self.clear_path = msg.data
 
     def cleanup(self):  
         vel_msg = Twist() 
         self.pub_cmd_vel.publish(vel_msg) 
 
 if __name__ == "__main__":  
-    GoToGoal()  
+    GoToGoal()
+

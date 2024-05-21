@@ -7,13 +7,10 @@
       },
       "includePath": [
         "/opt/ros/noetic/include/**",
-        "/home/alex_c/catkin_ws/src/begginer_tutorials/include/**",
-        "/home/alex_c/catkin_ws/src/ADJIC-bot/Minichallenges/minichal2/include/**",
-        "/home/alex_c/catkin_ws/src/ADJIC-bot/Minichallenges/minichal4/include/**",
-        "/home/alex_c/puzzlebot_ws/src/puzzlebot_control/include/**",
-        "/home/alex_c/puzzlebot_ws/src/puzzlebot_examples/include/**",
-        "/home/alex_c/puzzlebot_ws/src/puzzlebot_rviz/include/**",
-        "/home/alex_c/catkin_ws/src/robot_setup_tf/include/**",
+        "/home/andreag/catkin_ws/src/adjic_autonomousnavigation_puzzlebot/adjic_autonomousnavigation_puzzlebot/include/**",
+        "/home/andreag/catkin_ws/src/beginner_tutorials/include/**",
+        "/home/andreag/catkin_ws/src/minichallenge5/include/**",
+        "/home/andreag/catkin_ws/src/puzzlebot_sim/include/**",
         "/usr/include/**"
       ],
       "name": "ROS",
