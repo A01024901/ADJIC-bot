@@ -28,7 +28,6 @@ class GoToGoal:
         positions = [[0.75 , -0.5] , [0.5 , -3.25] , [4.5,-2.25] , [4.5,-2.25]]
         self.x_target = positions[map][0]
         self.y_target = positions[map][1]
-        
 
         ###--- Objetos ---###
         self.flag_msg = Bool()

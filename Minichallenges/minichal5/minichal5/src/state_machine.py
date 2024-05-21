@@ -57,7 +57,7 @@ class state_machine:
                 self.hold_behave()
 
             if self.state == "go_to_goal":
-                
+                print ("Go to goal")   
                 self.gtg_behave()
 
             elif self.state == "follow_wall":
