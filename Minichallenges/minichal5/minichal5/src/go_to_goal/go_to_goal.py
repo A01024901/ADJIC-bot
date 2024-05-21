@@ -28,7 +28,7 @@ class GoToGoal:
         map = int(rospy.get_param('world_number' , "1"))
         print (map)
         positions = [[0.75 , -0.5] , [0.5 , -3.25] , [4.5,-2.25] , [4.5,-2.25]]
-        positions = [[1.0 , -0.5] , [0.30 , -3.25] , [4.75,-2.25] , [4.75,-2.25]]
+        positions = [[1.0 , -0.5] , [0.10 , -3.45] , [4.75,-2.25] , [4.75,-2.25]]
         self.x_target = positions[map][0]
         self.y_target = positions[map][1]
 
@@ -45,7 +45,7 @@ class GoToGoal:
         self.y_pos = 0.0
         self.theta_robot = 0.0
 
-        while rospy.get_time() == 0: print ("Simulacion no iniciada") #Descomentar en simulacion 
+        while rospy.get_time() == 0: pass #Descomentar en simulacion 
 
         self.t_ant = rospy.get_time() #Valor para obtener dt 
 
@@ -93,15 +93,17 @@ class GoToGoal:
         return v , w
     
     def at_goal(self):
+        tolerance = 0.1
         x_window = self.x_pos < (self.x_target + 0.1) and self.x_pos > (self.x_target - 0.1)
-        x_window =  self.x_target - 0.1 < self.x_pos < self.x_target + 0.1
+        x_window =  self.x_target - tolerance < self.x_pos < self.x_target + tolerance
         y_window = self.y_pos < (self.y_target + 0.1) and self.y_pos > (self.y_target - 0.1)
+        y_window = self.y_target - 0.1 < self.y_pos < self.y_target + 0.1 
         if x_window and y_window:
             self.at_goal_flag = True
 
         else: self.at_goal_flag = False
 
-        print (self.at_goal_flag)
+        print (x_window , y_window)
     
     def fill_messages(self , v , w ) :
         self.v_msg.linear.x = v

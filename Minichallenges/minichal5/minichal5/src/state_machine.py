@@ -120,6 +120,7 @@ class state_machine:
 
     def print_states(self):
         pr = np.array([self.x_pos , self.x_goal , self.y_pos , self.y_goal , self.x_temp , self.y_temp])
+        print("###############################")
         print("State: " , self.state)
         print("Position x: " , round(self.x_pos , 3) , "Target x: " , self.x_goal)
         print("Position y: " , round(self.y_pos , 3) , "Target y: " , self.y_goal)
