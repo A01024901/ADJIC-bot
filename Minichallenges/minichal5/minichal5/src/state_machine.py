@@ -5,6 +5,9 @@ from std_msgs.msg import Bool
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import PoseStamped
 
+np.set_printoptions(suppress = True) 
+np.set_printoptions(formatter = {'float': '{: 0.4f}'.format})
+
 class state_machine:
     def __init__(self):
         ###--- Inicio del Nodo ---###
@@ -50,24 +53,26 @@ class state_machine:
 
         while rospy.get_time() == 0: pass #Descomentar en simulacion 
 
-        print("Nodo operando")
+        print("Maquina de estados")
 
         while not rospy.is_shutdown():
             if self.state == "on_hold":
-                print ("On_hold")   
+                #print ("On_hold")   
                 self.hold_behave()
 
             elif self.state == "go_to_goal":
-                print ("Go to goal")   
+                #print ("Go to goal")   
                 self.gtg_behave()
 
             elif self.state == "follow_wall":
-                print ("Follow Wall")
+                #print ("Follow Wall")
                 self.follow_wall_behave()
 
             elif self.state == "stop":
-                print ("Reached goal")
+                #print ("Reached goal")
                 self.stop_behave()
+            
+            self.print_states()
 
             ###--- Publish ---###
             self.cmd_vel_pub.publish(self.cmd_vel)
@@ -80,7 +85,7 @@ class state_machine:
 
     def gtg_behave(self):
         self.cmd_vel = self.gtg_vel
-        print(not self.gtg_flag , self.object_front)
+        #print(not self.gtg_flag , self.object_front)
         if self.gtg_flag:
             self.state = "stop"
         elif (not self.gtg_flag) and self.object_front:
@@ -90,7 +95,7 @@ class state_machine:
 
     def follow_wall_behave(self):
         self.cmd_vel = self.fw_vel
-        print("Vel_received" , self.fw_vel.linear.x , self.fw_vel.angular.z)
+        #print("Vel_received" , self.fw_vel.linear.x , self.fw_vel.angular.z)
         if self.gtg_flag:
             self.state = "stop"
 
@@ -108,6 +113,15 @@ class state_machine:
     def stop_behave(self):
         self.cmd_vel = Twist()
         self.state = "on_hold"
+
+    def print_states(self):
+        pr = np.array([self.x_pos , self.x_goal , self.y_pos , self.y_goal , self.x_temp , self.y_temp])
+        print("State: " , self.state)
+        print("Position x: " , round(self.x_pos , 3) , "Target x: " , self.x_goal)
+        print("Position y: " , round(self.y_pos , 3) , "Target y: " , self.y_goal)
+        print("Temp x: " , round(self.x_temp , 3) , "Temp y: " , round(self.y_temp , 3))
+        print("DistanceF: " , self.calc_distance() , "Object: " , self.object_front)
+        print("###############################")
 
     def gtg_cb(self , twist):
         self.gtg_vel = twist

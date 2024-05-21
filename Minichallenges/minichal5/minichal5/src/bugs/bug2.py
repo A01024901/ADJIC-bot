@@ -112,6 +112,10 @@ class follow_walls:
         self.cmd_vel.angular.z = w_AO
         print ("Calc_vel: " ,v_AO , w_AO)
 
+    def clear_path(self):
+        data = self.scan.ranges
+        ranges = np.roll(data, int(len(data)/2 + 1))   
+
 
     def wl_cb (self , msg):
         self.wl = msg.data
