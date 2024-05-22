@@ -27,7 +27,8 @@ if __name__ == "__main__":
     #arg_parser.add_argument("filename", help="Path to yaml file containing " +\
     #                                         "camera calibration data")
     #args = arg_parser.parse_args()
-    filename = args.filename
+    ruta = os.path.dirname(os.path.abspath(__file__))
+    filename = ruta + 'ost.yaml'
 
     # Parse yaml file
     camera_info_msg = yaml_to_CameraInfo(filename)
