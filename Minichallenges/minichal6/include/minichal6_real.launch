@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <launch>
+        <!-- Params -->
+        <node pkg="minichal6" type="pub_calibration.py" name="camera_data"/>
+
+        <!--Minichalenge Nodes-->
+        
+
+    </launch>
