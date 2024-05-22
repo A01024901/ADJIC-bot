@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <launch>
+        <!-- World Params -->
+        <arg name="world_number" default="1"/>
+        <arg name="bug_number" default="2"/>
+
+        <!--Gazebo sim-->
+        <include file="$(find puzzlebot_gazebo)/launch/puzzlebot_gazebo.launch"/>
+
+        <!--Minichalenge Nodes-->
+        
+
+    </launch>

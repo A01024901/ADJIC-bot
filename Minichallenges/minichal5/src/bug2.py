@@ -94,7 +94,7 @@ class AutonomousNav():
 
                 elif self.current_state == 'WallFollower': 
                     theta_gtg, theta_ao = self.compute_angles(self.x_target, self.y_target, self.x, self.y, self.theta, closest_angle)
-                    d_t = np.sqrt((self.x_target-self.x)**2+(self.y_target-self.y)**2)
+                    d_t = np.sqrt((self.x_target-self.x)*2+(self.y_target-self.y)*2)
                     print("Quit?: ", self.quit_fw_bug_two(theta_gtg, theta_ao, self.x_target, self.y_target, self.x, self.y))
 
                     if self.at_goal() or closest_range < stop_distance: 
@@ -108,7 +108,7 @@ class AutonomousNav():
                         ffw = True
 
                     else:
-                        d_t1 = np.sqrt((self.x_target-self.x)**2+(self.y_target-self.y)**2)  if ffw else d_t1
+                        d_t1 = np.sqrt((self.x_target-self.x)*2+(self.y_target-self.y)*2)  if ffw else d_t1
                         clk_cnt = self.clockwise_counter(self.x_target, self.y_target, self.x, self.y, self.theta, closest_angle) if ffw else clk_cnt
                         ffw = False
                         v_fw, w_fw = self.following_walls(closest_angle, clk_cnt) 
@@ -121,7 +121,7 @@ class AutonomousNav():
             rate.sleep()  
 
     def at_goal(self): 
-        return np.sqrt((self.x_target-self.x)**2+(self.y_target-self.y)**2)<self.target_position_tolerance
+        return np.sqrt((self.x_target-self.x)*2+(self.y_target-self.y)*2)<self.target_position_tolerance
 
     def following_walls(self, closest_angle, counter_clockwise): #cambiamos clk_cnt por counter_clockwise
         theta_ao = closest_angle
@@ -135,8 +135,6 @@ class AutonomousNav():
 
         w_fw = 2.0 * theta_fw
         v_fw = 0.09
-
-        v_fw, w_fw = self.calc_fw(counter_clockwise , closest_angle)
     
         return v_fw, w_fw
 
@@ -215,18 +213,6 @@ class AutonomousNav():
 
             return e_theta, theta_ao
     
-    def calc_fw(self , cw_b , closest_angle):
-        #print ("Follow W")
-        fw_th = (np.pi / 2) + closest_angle if cw_b else -(np.pi / 2) + closest_angle
-        if (-0.08 > fw_th > 0.08) and True :
-            v_AO = 0.0
-            w_AO = 0.4 * fw_th
-        else :
-            v_AO = 0.15
-            w_AO = 2.8 * fw_th
-
-        return v_AO , w_AO
-    
 
     def compute_gtg_control(self, x_target, y_target, x_robot, y_robot, theta_robot): 
         #This function returns the linear and angular speed to reach a given goal 
@@ -240,7 +226,7 @@ class AutonomousNav():
         av = 1.0 #Constant to adjust the exponential's growth rate   
         aw = 2.0 #Constant to adjust the exponential's growth rate 
 
-        ed = np.sqrt((x_target-x_robot)**2+(y_target-y_robot)**2) 
+        ed = np.sqrt((x_target-x_robot)*2+(y_target-y_robot)*2) 
 
         #Compute angle to the target position 
 

@@ -1,25 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
     <launch>
-        <!-- World Number -->
+        <!-- World Params -->
         <arg name="world_number" default="1"/>
         <arg name="bug_number" default="2"/>
 
         <!-- Worlds -->
         <arg name="world_name" default="$(find puzzlebot_gazebo)/worlds/obstacle_avoidance_$(arg world_number).world"/>
 
-        <!-- GUI-->
-        <arg name="gui" default="true"/>
-
         <!--Gazebo sim-->
         <include file="$(find puzzlebot_gazebo)/launch/puzzlebot_gazebo.launch">
             <arg name="world_name" value="$(arg world_name)"/>
-            <arg name="gui" value="$(arg gui)" />
         </include>
 
         <!--Minichalenge Nodes-->
-        <node pkg="minichal5" type="state_machine.py" name="state_machine" output="screen"/>
-        <node pkg="minichal5" type="localization.py" name="odom" />
-        <node pkg="minichal5" type="go_to_goal.py" name="go_to_goal" />
         <node pkg="minichal5" type="bug$(arg bug_number).py" name="follow_walls" />
 
     </launch>
