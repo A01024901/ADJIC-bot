@@ -5,8 +5,11 @@
         <arg name="bug_number" default="2"/>
         <arg name="gui" default="true"/>
 
-        <!-- Worlds -->
+        <!-- World -->
         <arg name="world_name" default="puzzlebot_aruco_markers.world"/>
+
+        <!--Rviz-->
+        <include file="$(find minichal6)/include/rviz/rviz.launch"/> 
 
         <!--Gazebo sim-->
         <include file="$(find puzzlebot_gazebo)/launch/puzzlebot_gazebo.launch">
@@ -15,6 +18,7 @@
         </include>
 
         <!--Minichalenge Nodes-->
+        <node pkg="image_transport" type="republish" name="rgb_compress" args="raw in:=/puzzlebot_1/camera/image_raw compressed out:=/image_compressed"/>
         
 
     </launch>

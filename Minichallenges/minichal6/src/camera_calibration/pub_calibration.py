@@ -28,7 +28,7 @@ if __name__ == "__main__":
     #                                         "camera calibration data")
     #args = arg_parser.parse_args()
     ruta = os.path.dirname(os.path.abspath(__file__))
-    filename = ruta + 'ost.yaml'
+    filename = ruta + '/ost.yaml'
 
     # Parse yaml file
     camera_info_msg = yaml_to_CameraInfo(filename)
