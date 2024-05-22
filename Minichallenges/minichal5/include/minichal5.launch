@@ -5,7 +5,7 @@
         <arg name="bug_number" default="2"/>
 
         <!-- Worlds -->
-        <arg name="world_name" default="$(find puzzlebot_gazebo)/worlds/obstacle_avoidance_$(arg world_number).world"/>
+        <arg name="world_name" default="obstacle_avoidance_$(arg world_number).world"/>
 
         <!--Gazebo sim-->
         <include file="$(find puzzlebot_gazebo)/launch/puzzlebot_gazebo.launch">
