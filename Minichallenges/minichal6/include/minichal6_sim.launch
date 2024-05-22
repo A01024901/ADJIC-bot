@@ -3,6 +3,7 @@
         <!-- World Params -->
         <arg name="world_number" default="1"/>
         <arg name="bug_number" default="2"/>
+        <arg name="gui" default="true"/>
 
         <!-- Worlds -->
         <arg name="world_name" default="puzzlebot_aruco_markers.world"/>
@@ -10,6 +11,7 @@
         <!--Gazebo sim-->
         <include file="$(find puzzlebot_gazebo)/launch/puzzlebot_gazebo.launch">
             <arg name="world_name" value="$(arg world_name)"/>
+            <arg name="gui" value="$(arg gui)"/>
         </include>
 
         <!--Minichalenge Nodes-->
