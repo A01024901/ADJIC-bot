@@ -4,7 +4,7 @@
   <arg name="fiducial_len" default="0.096"/> 
   <arg name="dictionary" default="16"/> 
   <arg name="do_pose_estimation" default="true"/> 
-  <arg name="ignore_fiducials" default="0-701,704-1023" /> 
+  <arg name="ignore_fiducials" default="" /> 
   <arg name="fiducial_len_override" default="" /> 
  
   <node pkg="aruco_detect" name="aruco_detect" type="aruco_detect" output="screen" respawn="false"> 

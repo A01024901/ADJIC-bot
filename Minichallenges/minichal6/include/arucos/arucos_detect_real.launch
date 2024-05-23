@@ -3,7 +3,7 @@
   <arg name="camera_topic" default="/image_compressed/compressed"/> 
   <arg name="camera_info" default="/camera_info"/> 
   <arg name="fiducial_len" default="0.096"/> 
-  <arg name="ignore_fiducials" default="0-702,704-1023" /> 
+  <arg name="ignore_fiducials" default="" /> 
   <arg name="fiducial_len_override" default="" /> 
  
   <node pkg="aruco_detect" name="aruco_detect" type="aruco_detect" output="screen" respawn="false"> 
