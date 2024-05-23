@@ -3,9 +3,8 @@
 import rospy 
 import numpy as np
 from fiducial_msgs.msg import FiducialTransformArray
-import tf.transformations as tft
 
-class aruco_finder:
+class ArucoFinder:
     def __init__(self):
         ###--- Inicio del Nodo ---###
         rospy.init_node('aruco_finder')
@@ -14,9 +13,6 @@ class aruco_finder:
         ###--- Subscriptores ---###
         rospy.Subscriber("/fiducial_transforms", FiducialTransformArray, self.ft_cb)
     
-        ###--- Publishers ---###
-        # self.odom_pub = rospy.Publisher("odom", Odometry, queue_size=1)
-
         ###--- Robot Constants ---###
         self.dt = 0.02
         self.id = 703
@@ -28,8 +24,6 @@ class aruco_finder:
         ])
 
         ###--- Variables ---####
-        
-        ###--- Objects ---###
         self.fiducial_transform = FiducialTransformArray()
         rate = rospy.Rate(int(1.0 / self.dt))
 
@@ -49,47 +43,31 @@ class aruco_finder:
         for aruco in self.fiducial_transform.transforms:
             if aruco.fiducial_id == self.id:
                 print("Fiducial ID: ", aruco.fiducial_id)
-                print("Pose: ", aruco.transform.translation)
-                print("Orientation: ", aruco.transform.rotation)
-                print(" ")
 
                 cam_p_aruco = np.array([
                     aruco.transform.translation.x, 
                     aruco.transform.translation.y, 
                     aruco.transform.translation.z
                 ])
-                cam_q_aruco = np.array([
-                    aruco.transform.rotation.x, 
-                    aruco.transform.rotation.y, 
-                    aruco.transform.rotation.z, 
-                    aruco.transform.rotation.w
-                ])
 
-                robot_p_aruco = self.transform_marker_position(cam_p_aruco, cam_q_aruco)
-                rospy.loginfo("Position in robot frame: %s", robot_p_aruco)
+                robot_p_aruco = self.transform_marker_position(cam_p_aruco)
 
                 distance = np.linalg.norm(robot_p_aruco)
-                angle = np.arctan2(robot_p_aruco[1], robot_p_aruco[0])
+                angle_rad = np.arctan2(robot_p_aruco[1], robot_p_aruco[0])
+                angle_deg = np.degrees(angle_rad)
 
                 rospy.loginfo("Distance to marker: %f", distance)
-                rospy.loginfo("Angle to marker: %f", angle)
+                rospy.loginfo("Angle to marker: %f degrees", angle_deg)
 
-    def transform_marker_position(self, cam_p_aruco, cam_q_aruco):
-        # Convert quaternion to rotation matrix
-        cam_R_aruco = tft.quaternion_matrix(cam_q_aruco)
-
-        # Create homogeneous transformation matrix for the marker in camera frame
-        cam_T_aruco = np.identity(4)
-        cam_T_aruco[:3, :3] = cam_R_aruco[:3, :3]
-        cam_T_aruco[:3, 3] = cam_p_aruco
-
+    def transform_marker_position(self, cam_p_aruco):
         # Transform to robot frame
-        robot_T_aruco = np.dot(self.camera_t_robot, cam_T_aruco)
-        robot_p_aruco = robot_T_aruco[:3, 3]
+        cam_p_aruco_homogeneous = np.append(cam_p_aruco, 1.0)  # Convert to homogeneous coordinates
+        robot_p_aruco_homogeneous = np.dot(self.camera_t_robot, cam_p_aruco_homogeneous)
+        robot_p_aruco = robot_p_aruco_homogeneous[:3]  # Convert back to Cartesian coordinates
         return robot_p_aruco
 
     def cleanup(self):
         print("Apagando Localización")
 
 if __name__ == "__main__":
-    aruco_finder()
+    ArucoFinder()
