@@ -6,7 +6,7 @@
   <arg name="ignore_fiducials" default="" /> 
   <arg name="fiducial_len_override" default="" /> 
  
-  <node pkg="aruco_detect" name="aruco_detect" type="aruco_detect" output="screen" respawn="false"> 
+  <node pkg="aruco_detect" name="aruco_detect" type="aruco_detect" respawn="false"> 
     <param name="image_transport" value="compressed"/> 
     <param name="publish_images" value="true" /> 
     <param name="fiducial_len" value="$(arg fiducial_len)"/> 
@@ -14,8 +14,8 @@
     <param name="do_pose_estimation" value="true"/> 
     <param name="ignore_fiducials" value="$(arg ignore_fiducials)"/> 
     <param name="fiducial_len_override" value="$(arg camera_topic)"/> 
-    <remap from="/camera/compressed" to="(arg fiducial_len_override)"/> 
-    <remap from="/camera_info" to="(arg camera_info)"/> 
+    <remap from="/camera/compressed" to="$(arg camera_topic)"/> 
+    <remap from="/camera_info" to="$(arg camera_info)"/> 
   </node> 
 
 </launch>
