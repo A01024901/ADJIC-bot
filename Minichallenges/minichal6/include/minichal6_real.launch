@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
     <launch>
-        <!-- Params -->
+        <!-- Args -->
+        <arg name="image" default="/image_compressed/compressed"/>
+        <arg name="camera_info" default="$(arg world_name)"/>
+
+        <!-- Image nodes -->
         <node pkg="minichal6" type="pub_calibration.py" name="camera_data"/>
+        <node pkg="image_transport" type="republish" name="compress_img" args="raw in:=/puzzlebot_1/camera/image_raw compressed out:=/image_compressed"/>
+
+        <include file="$(find minichal6)/launch/aruco_detect_real.launch">
+        </include>
 
         <!--Minichalenge Nodes-->
         

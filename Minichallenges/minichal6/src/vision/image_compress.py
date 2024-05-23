@@ -16,7 +16,7 @@ class localisation:
         rospy.on_shutdown(self.cleanup)
 
         ###--- Subscriptores ---###
-        rospy.Subscriber("/wr" , Float32 , self.wr_cb)
+        rospy.Subscriber("/puzzlebot_1/camera/image_raw/compressed" , Float32 , self.wr_cb)
 
         ###--- Publishers ---###
         self.odom_pub = rospy.Publisher("odom" , Odometry , queue_size=1)
