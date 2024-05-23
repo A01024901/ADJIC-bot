@@ -15,7 +15,7 @@
     <param name="ignore_fiducials" value="$(arg ignore_fiducials)"/> 
     <param name="fiducial_len_override" value="$(arg camera_topic)"/> 
     <remap from="/camera/compressed" to="(arg fiducial_len_override)"/> 
-    <remap from="/camera_info" to="/usb_cam/camera_info"/> 
+    <remap from="/camera_info" to="(arg camera_info)"/> 
   </node> 
 
 </launch>
