@@ -17,9 +17,9 @@ class ArucoFinder:
         self.dt = 0.02
         self.id = 703
         self.camera_t_robot = np.array([
-            [1.0, 0.0, 0.0, 0.06],
-            [0.0, 1.0, 0.0, 0.0],
-            [0.0, 0.0, 1.0, 0.065],
+            [0.0, 0.0, 1.0, 0.06],
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, -1.0, 0.0, 0.065],
             [0.0, 0.0, 0.0, 1.0]
         ])
 
@@ -56,8 +56,8 @@ class ArucoFinder:
                 angle_rad = np.arctan2(robot_p_aruco[1], robot_p_aruco[0])
                 angle_deg = np.degrees(angle_rad)
 
-                rospy.loginfo("Distance to marker: %f", distance)
-                rospy.loginfo("Angle to marker: %f degrees", angle_deg)
+                print("Distance to marker: %f", distance)
+                print("Angle to marker: %f degrees", angle_deg)
 
     def transform_marker_position(self, cam_p_aruco):
         # Transform to robot frame
