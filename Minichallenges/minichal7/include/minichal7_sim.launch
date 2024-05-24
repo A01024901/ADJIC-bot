@@ -10,7 +10,7 @@
             <arg name="gui" value="$(arg gui)"/>
         </include>
         
-        <!--Minichalenge Nodes-->
+        <!--Dependency Nodes-->
         <node pkg="image_transport" type="republish" name="compress_img" args="raw in:=/puzzlebot_1/camera/image_raw compressed out:=/image_compressed"/>
         <node pkg="minichal6" type="pub_calibration.py" name="camera_data"/>
         <node pkg="rqt_image_view" type="rqt_image_view" name="visual"/>
@@ -18,8 +18,9 @@
             <remap from="/cmd_vel" to="/puzzlebot_1/base_controller/cmd_vel"/>
         </node>
 
-        <include file="$(find minichal6)/include/arucos/arucos_detect_sim.launch"/>
-        
-        
+        <include file="$(find minichal7)/include/arucos/arucos_detect_sim.launch"/>
 
+        <!--Dependency Nodes-->
+        
+        
     </launch>
