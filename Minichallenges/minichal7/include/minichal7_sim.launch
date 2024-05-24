@@ -19,8 +19,9 @@
         </node>
 
         <include file="$(find minichal7)/include/arucos/arucos_detect_sim.launch"/>
+        <include file="$(find minichal7)/include/rviz/rviz.launch"/>
 
-        <!--Dependency Nodes-->
+        <!--Minichal Nodes-->
         
         
     </launch>
