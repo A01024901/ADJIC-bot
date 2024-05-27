@@ -16,7 +16,7 @@
     <param name="ignore_fiducials" value="$(arg ignore_fiducials)"/> 
     <param name="fiducial_len_override" value="$(arg fiducial_len_override)"/> 
     <remap from="/camera/compressed" to="/image_compressed/compressed"/> 
-    <remap from="/camera_info" to="/puzzlebot_1/camera/camera_info"/> 
+    <remap from="/camera_info" to="/camera_info"/> 
   </node> 
 
 </launch>

@@ -4,6 +4,16 @@ import rospy
 import numpy as np
 from fiducial_msgs.msg import FiducialTransformArray
 
+class aruco:
+    def __init__(self , ID , x , y):
+        self.ID = ID
+        self.x = x
+        self.y = y
+
+    def get_trasnform():
+        pass
+
+
 class ArucoFinder:
     def __init__(self):
         ###--- Inicio del Nodo ---###
@@ -13,9 +23,8 @@ class ArucoFinder:
         ###--- Subscriptores ---###
         rospy.Subscriber("/fiducial_transforms", FiducialTransformArray, self.ft_cb)
     
-        ###--- Robot Constants ---###
+        ###--- Constants ---###
         self.dt = 0.02
-        self.id = 703
         self.camera_t_robot = np.array([
             [0.0, 0.0, 1.0, 0.1],
             [1.0, 0.0, 0.0, 0.0],
@@ -23,14 +32,15 @@ class ArucoFinder:
             [0.0, 0.0, 0.0, 1.0]
         ])
 
-        ###--- Variables ---####
+        ###--- Objetos ---####
+        self.aruco1 = aruco()
+        self.aruco2 = aruco()
+        self.aruco3 = aruco()
+        self.aruco4 = aruco()
         self.fiducial_transform = FiducialTransformArray()
         rate = rospy.Rate(int(1.0 / self.dt))
 
-        while rospy.get_time() == 0:
-            pass # Esperar a que el tiempo de ROS esté inicializado 
-
-        print("Nodo operando")
+        while rospy.get_time() == 0: pass 
 
         while not rospy.is_shutdown():
             self.process_transforms()

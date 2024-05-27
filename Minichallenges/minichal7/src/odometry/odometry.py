@@ -2,9 +2,9 @@
 
 import rospy 
 import numpy as np
+from dead_reckoning_class import dead_reckoning
 from std_msgs.msg import Float32
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import TransformStamped
 from tf.transformations import quaternion_from_euler
 import tf2_ros #ROS package to work with transformations 
@@ -21,16 +21,11 @@ class localisation:
 
         ###--- Publishers ---###
         self.odom_pub = rospy.Publisher("odom" , Odometry , queue_size=1)
-        #self.pos_pub = rospy.Publisher("pose_odom" , PoseStamped , queue_size=1)
 
         ###--- Robot Constants ---###
         self.r = 0.05
         self.l = 0.19
         self.dt = 0.02
-
-        self.mu = np.array([[0.0 , 0.0 , 0.0]])
-        self.Q = np.array([[0.001 , 0.001 , 0.002] , [0.0001 , 0.002 , 0.0001] , [0.0002 , 0.0001 , 0.001]])
-        self.sigma = np.eye(3)
 
         ###--- Variables ---####
         self.w = 0.0
@@ -42,6 +37,7 @@ class localisation:
         self.theta = 0.0
         
         self.odom = Odometry()
+        self.covariance = dead_reckoning(self.dt)
         rate = rospy.Rate(int(1.0/self.dt))
         self.tf2_ros = tf2_ros.TransformBroadcaster() # Create a TransformBroadcaster object
         self.t = TransformStamped() # Create a TransformStamped object
@@ -52,21 +48,14 @@ class localisation:
 
         while not rospy.is_shutdown():
             self.get_robot_velocities()
-
-
-            self.H = np.array([[1, 0, -self.dt * self.v * np.sin(self.theta[2,0])], [0, 1, self.dt * self.v * np.cos(self.theta[2,0])], [0, 0, 1]]) # Jacobian of the measurement model
-            self.mu = np.array([[self.mu[0] + self.dt * self.v * np.cos(self.mu[2,0])], [self.mu[1] + self.dt * self.v * np.sin(self.mu[2])], [self.mu[2] + self.v * self.w]]) # Prediction step
-            self.sigma = self.H.dot(self.sigma).dot(self.H.T) + self.Q # Covariance matrix update
-
             self.update_robot_pose()
-            self.get_odom()
             self.get_transform(self.x, self.y, self.theta)
+            cov_mat = self.covariance.calculate(self.v , self.w , self.wr , self.wl)
+            self.get_odom(cov_mat)
 
-    
             ###--- Publish ---###
             self.odom_pub.publish(self.odom)
             rate.sleep()
-
 
     def update_robot_pose(self):
         self.x = self.x + self.v * np.cos(self.theta) * self.dt   
@@ -79,10 +68,9 @@ class localisation:
         self.w = self.r * ((((2*self.v/self.r) - self.wl)-self.wl)/self.l)
         #print (self.v , self.w , self.theta)
 
-    def get_odom (self): 
+    def get_odom (self , cov_mat): 
         self.odom.header.frame_id = "odom"
-        #self.odom.child_frame_id = "Origin2"
-        self.odom.pose.pose.position.x = self.x
+        self.odom.pose.pose.position.x = self.x #+ 0.1
         self.odom.pose.pose.position.y = self.y
 
         quat = quaternion_from_euler(0 , 0 , self.theta)
@@ -91,24 +79,19 @@ class localisation:
         self.odom.pose.pose.orientation.z = quat[2]
         self.odom.pose.pose.orientation.w = quat[3]
 
-        self.odom.twist.twist.linear.x = self.v
-        self.odom.twist.twist.angular.z = self.w
+        self.odom.pose.covariance = [0.0] * 36
 
-        self.odom.pose.covariance = [0,0] * 36
-        self.odom.pose.covariance[0] = self.sigma[0],[0] * self.sigma[0][0]
-        self.odom.pose.covariance[1] = self.sigma[0][1]
-        self.odom.pose.covariance[5] = self.sigma[0][2]
-        self.odom.pose.covariance[6] = self.sigma[1][0]
-        self.odom.pose.covariance[7] = self.sigma[1][2]
-        self.odom.pose.covariance[11] = self.sigma[1][2]
-        self.odom.pose.covariance[30] = self.sigma[2][0]
-        self.odom.pose.covariance[31] = self.sigma[2][1]
-        self.odom.pose.covariance[35] = self.sigma[2][2] * self.sigma[2][2]
-        
+        self.odom.pose.covariance[0] = cov_mat[0][0] * 17 #Covariance in x
+        self.odom.pose.covariance[1] = cov_mat[0][1] #Covariance in xy 
+        self.odom.pose.covariance[5] = cov_mat[0][2] #Covariance in x theta
+        self.odom.pose.covariance[6] = cov_mat[1][0] #Covariance in y x
+        self.odom.pose.covariance[7] = cov_mat[1][1] #Covariance in y 
+        self.odom.pose.covariance[11] = cov_mat[1][2] #Covariance in y theta
+        self.odom.pose.covariance[30] = cov_mat[2][0] #Covariance in theta x
+        self.odom.pose.covariance[31] = cov_mat[2][1] #Covariance in theta y
+        self.odom.pose.covariance[35] = cov_mat[2][2] * 5 #Covariance in theta
 
-        self.odom_pub.publish(self.odom)
-
-    def get_transform(self, x, y, yaw, Sigma):
+    def get_transform(self, x, y, yaw):
             # Fill the transformation information 
             self.t.header.stamp = rospy.Time.now() 
             self.t.header.frame_id = "odom" 
@@ -125,10 +108,8 @@ class localisation:
             self.t.transform.rotation.y = q[1] 
             self.t.transform.rotation.z = q[2] 
             self.t.transform.rotation.w = q[3] 
-
             # A transformation is broadcasted instead of published 
-            self.tf2_ros.sendTransform(self.t) #broadcast the transformation
-
+            self.tf2_ros.sendTransform(self.t) #broadcast the transformation 
         
     def wr_cb (self , msg):
         self.wr = msg.data

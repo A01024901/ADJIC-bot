@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /LaserScan1
       Splitter Ratio: 0.5
     Tree Height: 407
   - Class: rviz/Selection
@@ -25,7 +26,7 @@ Panels:
   - Class: rviz/Time
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: LaserScan
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -52,38 +53,12 @@ Visualization Manager:
       Reference Frame: <Fixed Frame>
       Value: true
     - Class: rviz/TF
-      Enabled: true
+      Enabled: false
       Filter (blacklist): ""
       Filter (whitelist): ""
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        puzzlebot_1/base_footprint:
-          Value: true
-        puzzlebot_1/base_link:
-          Value: true
-        puzzlebot_1/camera_base_link:
-          Value: true
-        puzzlebot_1/camera_link:
-          Value: true
-        puzzlebot_1/camera_link_optical:
-          Value: true
-        puzzlebot_1/caster_holder_link:
-          Value: true
-        puzzlebot_1/jetson_link:
-          Value: true
-        puzzlebot_1/motor_left_link:
-          Value: true
-        puzzlebot_1/motor_right_link:
-          Value: true
-        puzzlebot_1/powerbank_link:
-          Value: true
-        puzzlebot_1/wheel_caster_link:
-          Value: true
-        puzzlebot_1/wheel_left_link:
-          Value: true
-        puzzlebot_1/wheel_right_link:
-          Value: true
       Marker Alpha: 1
       Marker Scale: 1
       Name: TF
@@ -91,34 +66,127 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        puzzlebot_1/base_footprint:
-          puzzlebot_1/base_link:
-            puzzlebot_1/camera_base_link:
-              puzzlebot_1/camera_link:
-                puzzlebot_1/camera_link_optical:
-                  {}
-            puzzlebot_1/caster_holder_link:
-              puzzlebot_1/wheel_caster_link:
-                {}
-            puzzlebot_1/jetson_link:
-              {}
-            puzzlebot_1/motor_left_link:
-              {}
-            puzzlebot_1/motor_right_link:
-              {}
-            puzzlebot_1/powerbank_link:
-              {}
-            puzzlebot_1/wheel_left_link:
-              {}
-            puzzlebot_1/wheel_right_link:
-              {}
+        {}
+      Update Interval: 0
+      Value: false
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/LaserScan
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Min Color: 0; 0; 0
+      Name: LaserScan
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Flat Squares
+      Topic: /scan
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 1
+      Class: rviz/RobotModel
+      Collision Enabled: false
+      Enabled: true
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: ""
+        base_footprint:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        camera_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        camera_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        caster_holder_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        jetson_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        lidar_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        lidar_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        motor_left_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        motor_right_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        powerbank_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        wheel_caster_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        wheel_left_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        wheel_right_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+      Name: RobotModel
+      Robot Description: robot_description
+      TF Prefix: ""
       Update Interval: 0
       Value: true
+      Visual Enabled: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: puzzlebot_1/base_link
+    Fixed Frame: base_footprint
     Frame Rate: 30
   Name: root
   Tools:
@@ -142,7 +210,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.6368324756622314
+      Distance: 1.515846610069275
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -150,17 +218,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0.0486222505569458
-        Y: -0.04976093769073486
-        Z: 0.017007827758789062
+        X: -0.5661699771881104
+        Y: 0.0027776993811130524
+        Z: 0.23206192255020142
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.4397970139980316
+      Pitch: 0.6347967982292175
       Target Frame: <Fixed Frame>
-      Yaw: 3.677469491958618
+      Yaw: 1.7924643754959106
     Saved: ~
 Window Geometry:
   Displays:
