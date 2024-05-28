@@ -3,10 +3,10 @@
         <!-- World -->
         <!-- ADJIC_map.world -->
         <!-- puzzlebot_aruco_markers.world -->
-        <arg name="world_name" default="$(find puzzlebot_gazebo)/worlds/ADJIC_map.world"/>
+        <arg name="world_name" default="$(find puzzlebot_gazebo)/worlds/adji_arucos.world"/>
         <include file="$(find puzzlebot_gazebo)/launch/puzzlebot_gazebo.launch">
             <arg name="world_name" value="$(arg world_name)"/>
-            <arg name="gui" value="true"/>
+            <arg name="gui" value="false"/>
             <arg name="pos_x" default="0.7"/> <!---x 0.7 , 2.0-->
             <arg name="pos_y" default="-0.65"/> <!-- -y -0.65 , 2.0-->
             <arg name="pos_theta" default="0.0"/> <!-- theta 0.0 , -1.57-->
