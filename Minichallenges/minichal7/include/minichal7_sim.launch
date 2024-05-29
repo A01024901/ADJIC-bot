@@ -7,15 +7,15 @@
         <include file="$(find puzzlebot_gazebo)/launch/puzzlebot_gazebo.launch">
             <arg name="world_name" value="$(arg world_name)"/>
             <arg name="gui" value="false"/>
-            <arg name="pos_x" default="0.7"/> <!---x 0.7 , 2.0-->
-            <arg name="pos_y" default="-0.65"/> <!-- -y -0.65 , 2.0-->
-            <arg name="pos_theta" default="0.0"/> <!-- theta 0.0 , -1.57-->
+
         </include>
         
         <!--Dependency Nodes-->
         <node pkg="image_transport" type="republish" name="compress_img" args="raw in:=/camera/image_raw compressed out:=/image_compressed"/>
         <node pkg="minichal6" type="pub_calibration.py" name="camera_data"/>
         <node pkg="rqt_image_view" type="rqt_image_view" name="visual"/>
+
+        <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop"/>
 
         <include file="$(find minichal7)/include/arucos/arucos_detect_sim.launch"/>
         <include file="$(find minichal7)/include/rviz/rviz.launch"/>
