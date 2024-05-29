@@ -3,6 +3,7 @@
 import rospy 
 import numpy as np
 from fiducial_msgs.msg import FiducialTransformArray
+from std_msgs.msg import Bool
 
 class aruco:
     def __init__(self , ID , x , y):
@@ -53,8 +54,6 @@ class aruco:
         
         return T_inv
     
-    
-
 class ArucoFinder:
     def __init__(self , mode):
         ###--- Inicio del Nodo ---###
@@ -63,6 +62,10 @@ class ArucoFinder:
 
         ###--- Subscriptores ---###
         rospy.Subscriber("/fiducial_transforms", FiducialTransformArray, self.ft_cb)
+
+        ###--- Publishers ---###
+        #self.odom_pub = rospy.Publisher("/" , Odometry , queue_size=1)
+        self.flag_pub = rospy.Publisher("/arucos_flag" , Bool , queue_size=1)
     
         ###--- Constants ---###
         self.dt = 0.02
@@ -74,10 +77,11 @@ class ArucoFinder:
 
         ###--- Objetos ---####
         arucos = [aruco(702 , 0.0 , 0.80) , aruco(701 , 0.0 , 1.60) , aruco(703 , 1.73 , 0.80) , 
-                       aruco(704 , 2.63 , 0.39) , aruco(705 , 2.85 , 0.0) , aruco(706 , 2.87 , 1.22)]
+                  aruco(704 , 2.63 , 0.39) , aruco(705 , 2.85 , 0.0) , aruco(706 , 2.87 , 1.22) ,
+                  aruco(707 , 1.74 , 1.22)]
         
-        arucos_sim = [aruco(702 , 0.0 , 0.80) , aruco(701 , 0.0 , 1.60) , aruco(703 , 1.73 , 0.80) , 
-                       aruco(704 , 2.63 , 0.39) , aruco(705 , 2.85 , 0.0) , aruco(706 , 2.87 , 1.22)]
+        arucos_sim = [aruco(0 , 0.0 , 0.80) , aruco(1 , 0.0 , 1.60) , aruco(2 , 1.73 , 0.80) , 
+                       aruco(3 , 2.63 , 0.39) , aruco(4 , 2.85 , 0.0) , aruco(5 , 2.87 , 1.22)]
         
         if mode == "sim": self.arucos = arucos_sim
         elif mode == "real": self.arucos = arucos
@@ -86,12 +90,13 @@ class ArucoFinder:
         rate = rospy.Rate(int(1.0 / self.dt))
 
         while not rospy.is_shutdown():
-            self.process_transforms()
+            print(self.process_transforms())
             rate.sleep()
 
     def process_transforms(self):
+        pub_msg = np.eye(4)
         if self.fiducial_transform.transforms:
-            pub_msg = np.eye(4)
+            flag_msg = True
             for arucos in self.fiducial_transform.transforms:
                 for posiciones in self.arucos:
                     if arucos.fiducial_id == posiciones.ID:
@@ -106,8 +111,15 @@ class ArucoFinder:
 
                         if self.get_distance(pub_msg) > distance:
                             pub_msg = origin2robot
+                            d = distance
+        else:
+            flag_msg = False
+            d = 0
 
-                    
+        return flag_msg , pub_msg , d
+
+        
+            
 
     def get_distance(self , m):
         d = m[:3 , 3]
@@ -121,4 +133,4 @@ class ArucoFinder:
         print("Apagando Localización")
 
 if __name__ == "__main__":
-    ArucoFinder()
+    ArucoFinder("sim")
