@@ -3,7 +3,7 @@
         <!-- World -->
         <!-- ADJIC_map.world -->
         <!-- puzzlebot_aruco_markers.world -->
-        <arg name="world_name" default="$(find puzzlebot_gazebo)/worlds/adji_arucos.world"/>
+        <arg name="world_name" default="$(find puzzlebot_gazebo)/worlds/ADJIC_map.world"/>
         <include file="$(find puzzlebot_gazebo)/launch/puzzlebot_gazebo.launch">
             <arg name="world_name" value="$(arg world_name)"/>
             <arg name="gui" value="false"/>
@@ -11,7 +11,7 @@
         </include>
         
         <!--Dependency Nodes-->
-        <node pkg="image_transport" type="republish" name="compress_img" args="raw in:=/camera/image_raw compressed out:=/image_compressed"/>
+        <node pkg="image_transport" type="republish" name="compress_img" args="raw in:=/puzzlebot_1/camera/image_raw compressed out:=/image_compressed"/>
         <node pkg="minichal6" type="pub_calibration.py" name="camera_data"/>
         <node pkg="rqt_image_view" type="rqt_image_view" name="visual"/>
 
