@@ -23,7 +23,7 @@ class aruco:
             [0.0, 0, 1, 0.1],
             [0.0, 0.0, 0.0, 1.0]])
         
-    def get_trasnform(self , x , y  , z):
+    def get_trasnform(self , x , y , z):
         camera2aruco = np.array([
             [1, 0.0, 0, x],
             [0, 1, 0.0, y],
@@ -90,11 +90,16 @@ class ArucoFinder:
         rate = rospy.Rate(int(1.0 / self.dt))
 
         while not rospy.is_shutdown():
-            print(self.process_transforms())
+            self.process_transforms()
             rate.sleep()
 
     def process_transforms(self):
-        pub_msg = np.eye(4)
+        d = 0
+        pub_msg = np.array([
+            [1, 0.0, 0, 5],
+            [0, 1, 0.0, 4],
+            [0.0, 0, 1, 2],
+            [0.0, 0.0, 0.0, 1.0]])
         if self.fiducial_transform.transforms:
             flag_msg = True
             for arucos in self.fiducial_transform.transforms:
@@ -102,19 +107,23 @@ class ArucoFinder:
                     if arucos.fiducial_id == posiciones.ID:
                         print("Fiducial ID: ", posiciones.ID)
 
-                        x = arucos.transform.translation.x, 
-                        y = arucos.transform.translation.y, 
+                        x = arucos.transform.translation.x 
+                        y = arucos.transform.translation.y
                         z = arucos.transform.translation.z
+                       
                         
                         origin2robot = posiciones.get_trasnform(x , y , z)
+                       
                         distance = self.get_distance(origin2robot)
-
+                        
+                       
+                        
                         if self.get_distance(pub_msg) > distance:
                             pub_msg = origin2robot
                             d = distance
         else:
             flag_msg = False
-            d = 0
+            
 
         return flag_msg , pub_msg , d
 

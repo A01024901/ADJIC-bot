@@ -2,7 +2,7 @@
   <!-- namespace for camera input --> 
   <arg name="transport" default="compressed"/> 
   <arg name="fiducial_len" default="0.135"/> 
-  <arg name="dictionary" default="1"/> 
+  <arg name="dictionary" default="3"/> 
   <arg name="do_pose_estimation" default="true"/> 
   <arg name="ignore_fiducials" default="" /> 
   <arg name="fiducial_len_override" default="" /> 
