@@ -24,11 +24,7 @@ class aruco:
             [0.0, 0, 1, 0.1],
             [0.0, 0.0, 0.0, 1.0]])
         
-<<<<<<< HEAD
     def transform_origin2robot(self , x , y  , z):
-=======
-    def get_trasnform(self , x , y , z):
->>>>>>> 8509bb812127266eb42d7e1358d000703f27dcdc
         camera2aruco = np.array([
             [1, 0.0, 0, x],
             [0, 1, 0.0, y],
@@ -100,19 +96,11 @@ class ArucoFinder:
         rate = rospy.Rate(int(1.0 / self.dt))
 
         while not rospy.is_shutdown():
-<<<<<<< HEAD
             flag , t = self.process_transforms()
             self.pub_msgs(flag , t)
             rate.sleep()
 
     def process_transforms(self):
-=======
-            self.process_transforms()
-            rate.sleep()
-
-    def process_transforms(self):
-        d = 0
->>>>>>> 8509bb812127266eb42d7e1358d000703f27dcdc
         pub_msg = np.array([
             [1, 0.0, 0, 5],
             [0, 1, 0.0, 4],
@@ -125,21 +113,12 @@ class ArucoFinder:
                     if arucos.fiducial_id == posiciones.ID:
                         print("Fiducial ID: ", posiciones.ID)
 
-<<<<<<< HEAD
                         x = arucos.transform.translation.x
-=======
-                        x = arucos.transform.translation.x 
->>>>>>> 8509bb812127266eb42d7e1358d000703f27dcdc
                         y = arucos.transform.translation.y
                         z = arucos.transform.translation.z
                        
                         
-<<<<<<< HEAD
                         origin2robot = posiciones.transform_origin2robot(x , y , z)
-=======
-                        origin2robot = posiciones.get_trasnform(x , y , z)
-                       
->>>>>>> 8509bb812127266eb42d7e1358d000703f27dcdc
                         distance = self.get_distance(origin2robot)
                         
                        
@@ -162,7 +141,6 @@ class ArucoFinder:
         self.x_pub.publish(self.x_msg)
         self.y_pub.publish(self.y_msg)
         self.flag_pub.publish(self.flag_msg)
-
 
     def get_distance(self , m):
         d = m[:3 , 3]
