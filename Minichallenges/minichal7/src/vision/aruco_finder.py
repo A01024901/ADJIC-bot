@@ -4,6 +4,7 @@ import rospy
 import numpy as np
 from fiducial_msgs.msg import FiducialTransformArray
 from std_msgs.msg import Bool
+from std_msgs.msg import Float32
 
 class aruco:
     def __init__(self , ID , x , y):
@@ -23,7 +24,7 @@ class aruco:
             [0.0, 0, 1, 0.1],
             [0.0, 0.0, 0.0, 1.0]])
         
-    def get_trasnform(self , x , y  , z):
+    def transform_origin2robot(self , x , y  , z):
         camera2aruco = np.array([
             [1, 0.0, 0, x],
             [0, 1, 0.0, y],
@@ -36,18 +37,18 @@ class aruco:
         self.origin2robot = self.origin2aruco.dot(aruco2camera).dot(camera2robot)
 
         return self.origin2robot
+    
+    def transform_robot2aruco(self):
+        pass
 
     def get_inv(self , T):
         R = T[:3, :3]
         t = T[:3, 3]
         
-        # Calcular la inversa de la matriz de rotación (la transpuesta)
         R_inv = R.T
         
-        # Calcular la nueva traslación
         t_inv = -R_inv @ t
         
-        # Construir la matriz homogénea inversa
         T_inv = np.eye(4)
         T_inv[:3, :3] = R_inv
         T_inv[:3, 3] = t_inv
@@ -64,7 +65,8 @@ class ArucoFinder:
         rospy.Subscriber("/fiducial_transforms", FiducialTransformArray, self.ft_cb)
 
         ###--- Publishers ---###
-        #self.odom_pub = rospy.Publisher("/" , Odometry , queue_size=1)
+        self.x_pub = rospy.Publisher("/ar_x" , Float32 , queue_size=1)
+        self.y_pub = rospy.Publisher("/ar_y" , Float32 , queue_size=1)
         self.flag_pub = rospy.Publisher("/arucos_flag" , Bool , queue_size=1)
     
         ###--- Constants ---###
@@ -85,16 +87,25 @@ class ArucoFinder:
         
         if mode == "sim": self.arucos = arucos_sim
         elif mode == "real": self.arucos = arucos
+
+        self.x_msg = Float32()
+        self.y_msg = Float32()
+        self.flag_msg = Bool()
         
         self.fiducial_transform = FiducialTransformArray()
         rate = rospy.Rate(int(1.0 / self.dt))
 
         while not rospy.is_shutdown():
-            print(self.process_transforms())
+            flag , t = self.process_transforms()
+            self.pub_msgs(flag , t)
             rate.sleep()
 
     def process_transforms(self):
-        pub_msg = np.eye(4)
+        pub_msg = np.array([
+            [1, 0.0, 0, 5],
+            [0, 1, 0.0, 4],
+            [0.0, 0, 1, 2],
+            [0.0, 0.0, 0.0, 1.0]])
         if self.fiducial_transform.transforms:
             flag_msg = True
             for arucos in self.fiducial_transform.transforms:
@@ -102,11 +113,11 @@ class ArucoFinder:
                     if arucos.fiducial_id == posiciones.ID:
                         print("Fiducial ID: ", posiciones.ID)
 
-                        x = arucos.transform.translation.x, 
-                        y = arucos.transform.translation.y, 
+                        x = arucos.transform.translation.x
+                        y = arucos.transform.translation.y
                         z = arucos.transform.translation.z
                         
-                        origin2robot = posiciones.get_trasnform(x , y , z)
+                        origin2robot = posiciones.transform_origin2robot(x , y , z)
                         distance = self.get_distance(origin2robot)
 
                         if self.get_distance(pub_msg) > distance:
@@ -116,10 +127,18 @@ class ArucoFinder:
             flag_msg = False
             d = 0
 
-        return flag_msg , pub_msg , d
+        return flag_msg , pub_msg 
 
         
-            
+    def pub_msgs(self , flag , t):
+        self.x_msg.data = t[0][3]
+        self.y_msg.data = t[1][3]
+        self.flag_msg.data = flag
+
+        self.x_pub.publish(self.x_msg)
+        self.y_pub.publish(self.y_msg)
+        self.flag_pub.publish(self.flag_msg)
+
 
     def get_distance(self , m):
         d = m[:3 , 3]

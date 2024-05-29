@@ -12,7 +12,10 @@
         <include file="$(find minichal6)/include/arucos/arucos_detect_real.launch"/>
 
         <!--Minichalenge Nodes-->
-        <node pkg="minichal7" type="aruco_finder.py" name="aruco_filter" output="screen"/>
+        <!--Minichal Nodes-->
+        <node pkg="minichal6" type="aruco_finder.py" name="aruco_finder"/>
+        <!--<node pkg="minichal6" type="odometry.py" name="odometry"/>-->
+        <node pkg="minichal6" type="bug$(arg bug).py" name="bug$(arg bug)"/>
         <node pkg="rqt_image_view" type="rqt_image_view" name="visual"/>
 
     </launch>

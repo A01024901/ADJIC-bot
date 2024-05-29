@@ -42,15 +42,17 @@ class dead_reckoning:
         self.e = np.copy(e)
 
     ###--- Order of execution ---###
-    def calculate (self , v , w , wr , wl):
+    def calculate (self , v , w , wr , wl , flag , a_x , a_y):
         self.calcQ(v , w , wr , wl)
         self.estimated_pos(v , w)
         self.linearization(v)
         self.uncertainty()
         self.u_prev = np.copy(self.u)
         self.e_prev = np.copy(self.e)
+        if flag:
+            self.correction()
 
-        return self.e
+        return self.e , self.u
     
     def calcQ (self , v , w , wr , wl):
         th = np.copy(self.u_prev[2])
@@ -66,5 +68,8 @@ class dead_reckoning:
         Q = sigma.dot(m).dot(sigma.T)
 
         self.q = np.copy(Q)
+
+    def correction(self):
+        pass
         
     

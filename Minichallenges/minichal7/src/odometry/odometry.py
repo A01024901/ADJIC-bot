@@ -1,8 +1,8 @@
 #!/usr/bin/env python3 
 import rospy 
-import numpy as np
 from dead_reckoning_class import dead_reckoning
 from std_msgs.msg import Float32
+from std_msgs.msg import Bool
 from nav_msgs.msg import Odometry
 from tf.transformations import quaternion_from_euler
 
@@ -15,6 +15,9 @@ class localisation:
         ###--- Subscriptores ---###
         rospy.Subscriber("/wr" , Float32 , self.wr_cb)
         rospy.Subscriber("/wl" , Float32 , self.wl_cb)
+        rospy.Subscriber("/ar_x" , Float32 , self.arx_cb)
+        rospy.Subscriber("/ar_y" , Float32 , self.ary_cb)
+        rospy.Subscriber("/arucos_flag" , Bool , self.flag_cb)
 
         ###--- Publishers ---###
         self.odom_pub = rospy.Publisher("odom" , Odometry , queue_size=1)
@@ -25,13 +28,14 @@ class localisation:
         self.dt = 0.02
 
         ###--- Variables ---####
+        self.v = 0.0
         self.w = 0.0
         self.wr = 0.0 
         self.wl = 0.0
-        self.v = 0.0
-        self.x = 0.0 
-        self.y = 0.0
-        self.theta = 0.0
+        self.xa = 0.0
+        self.ya = 0.0
+        self.flag = False
+        
         
         self.odom = Odometry()
         self.covariance = dead_reckoning(self.dt)
@@ -44,29 +48,23 @@ class localisation:
         while not rospy.is_shutdown():
             self.get_robot_velocities()
             self.update_robot_pose()
-            self.get_transform(self.x, self.y, self.theta)
-            cov_mat = self.covariance.calculate(self.v , self.w , self.wr , self.wl)
-            self.get_odom(cov_mat)
+            cov_mat , u = self.covariance.calculate(self.v , self.w , self.wr , self.wl)
+            self.get_odom(cov_mat , u)
 
             ###--- Publish ---###
             self.odom_pub.publish(self.odom)
-            rate.sleep()
-
-    def update_robot_pose(self):
-        self.x = self.x + self.v * np.cos(self.theta) * self.dt   
-        self.y = self.y + self.v * np.sin(self.theta) * self.dt  
-        self.theta = self.theta + self.w * self.dt         
+            rate.sleep() 
 
     def get_robot_velocities (self):
         self.v = (self.r * (self.wr + self.wl))/2
         self.w = self.r * ((((2*self.v/self.r) - self.wl)-self.wl)/self.l)
 
-    def get_odom (self , cov_mat): 
+    def get_odom (self , cov_mat , u): 
         self.odom.header.frame_id = "odom"
-        self.odom.pose.pose.position.x = self.x #+ 0.1
-        self.odom.pose.pose.position.y = self.y
+        self.odom.pose.pose.position.x = u[0] #+ 0.1
+        self.odom.pose.pose.position.y = u[1]
 
-        quat = quaternion_from_euler(0 , 0 , self.theta)
+        quat = quaternion_from_euler(0 , 0 , u[2])
         self.odom.pose.pose.orientation.x = quat[0]
         self.odom.pose.pose.orientation.y = quat[1]
         self.odom.pose.pose.orientation.z = quat[2]
@@ -89,6 +87,15 @@ class localisation:
 
     def wl_cb (self , msg):
         self.wl = msg.data
+
+    def arx_cb (self , msg):
+        self.xa = msg.data
+
+    def ary_cb (self , msg):
+        self.ya = msg.data
+
+    def flag_cb (self , msg):
+        self.flag = msg.data
 
     def cleanup (self):
         print ("Apagando Localsation")
