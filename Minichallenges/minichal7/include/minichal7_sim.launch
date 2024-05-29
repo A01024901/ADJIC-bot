@@ -6,8 +6,7 @@
         <arg name="world_name" default="$(find puzzlebot_gazebo)/worlds/ADJIC_map.world"/>
         <include file="$(find puzzlebot_gazebo)/launch/puzzlebot_gazebo.launch">
             <arg name="world_name" value="$(arg world_name)"/>
-            <arg name="gui" value="false"/>
-
+            <arg name="gui" value="true"/>
         </include>
         
         <!--Dependency Nodes-->
@@ -15,7 +14,9 @@
         <node pkg="minichal6" type="pub_calibration.py" name="camera_data"/>
         <node pkg="rqt_image_view" type="rqt_image_view" name="visual"/>
 
-        <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop"/>
+        <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop">
+            <remap from="/cmd_vel" to="/puzzlebot_1/base_controller/cmd_vel"/>
+        </node>
 
         <include file="$(find minichal7)/include/arucos/arucos_detect_sim.launch"/>
         <include file="$(find minichal7)/include/rviz/rviz.launch"/>
