@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import rospy
 from geometry_msgs.msg import Twist, PoseStamped
 from std_msgs.msg import Float32
@@ -24,15 +23,16 @@ class NavigateToGoal():
 
         ############ GOAL VARIABLES ############
 
-        self.x_target = 0.0  # x-coordinate of the goal
-        self.y_target = 0.0  # y-coordinate of the goal
+        self.path_points = [(1.0, 1.0), (2.0, 2.0), (3.0, 1.0)]  # List of points to follow
+        self.current_point_index = 0  # Index of the current target point
+        self.x_target, self.y_target = self.path_points[self.current_point_index]  # Initialize with the first target point
         self.goal_received = False  # Flag goal received
         self.lidar_received = False  # Flag laser scan received
-        self.target_position_tolerance = 0.001  # Tolerance goal reached
+        self.target_position_tolerance = 0.1  # Tolerance goal reached
         self.integral = 0.0
         self.prev_error = 0.0
         fw_distance = 0.30  # Distance to switch to wall-following mode
-        stop_distance = 0.001  # Distance to stop the robot if an obstacle is close 
+        stop_distance = 0.10  # Distance to stop the robot if an obstacle is close 
         eps = 0.20  # Safety buffer
         v_msg = Twist() 
         self.wr = 0  # Right wheel speed [rad/s]
@@ -78,9 +78,17 @@ class NavigateToGoal():
                         v_msg.angular.z = 0.0
 
                 elif self.current_state == 'NavigateToGoal':
+                    distance_to_target = self.calculate_distance(self.x_target, self.y_target, self.x, self.y)
+                    print(f"Distance to current point: {distance_to_target:.2f} meters")
+                    
                     if self.at_goal() or closest_range < stop_distance:
-                        print(f"Transitioning to Stop from NavigateToGoal. Target: ({self.x_target}, {self.y_target})")
-                        self.current_state = "Stop"
+                        if self.current_point_index < len(self.path_points) - 1:
+                            self.current_point_index += 1
+                            self.x_target, self.y_target = self.path_points[self.current_point_index]
+                            print(f"Moving to next point: ({self.x_target}, {self.y_target})")
+                        else:
+                            print(f"Reached final point: ({self.x_target}, {self.y_target}). Transitioning to Stop.")
+                            self.current_state = "Stop"
 
                     elif closest_range < fw_distance:
                         print("Transitioning to WallFollower from NavigateToGoal")
@@ -93,12 +101,17 @@ class NavigateToGoal():
 
                 elif self.current_state == 'WallFollower':
                     theta_gtg, theta_ao = self.compute_angles(self.x_target, self.y_target, self.x, self.y, self.theta, closest_angle)
-                    d_t = np.sqrt((self.x_target - self.x)**2 + (self.y_target - self.y)**2)
-                    print(f"Evaluating transition from WallFollower. Distance to target: {d_t}")
+                    d_t = self.calculate_distance(self.x_target, self.y_target, self.x, self.y)
+                    print(f"Evaluating transition from WallFollower. Distance to target: {d_t:.2f}")
 
                     if self.at_goal() or closest_range < stop_distance:
-                        print("Transitioning to Stop")
-                        self.current_state = "Stop"
+                        if self.current_point_index < len(self.path_points) - 1:
+                            self.current_point_index += 1
+                            self.x_target, self.y_target = self.path_points[self.current_point_index]
+                            print(f"Moving to next point: ({self.x_target}, {self.y_target})")
+                        else:
+                            print("Transitioning to Stop")
+                            self.current_state = "Stop"
                         fwf = True
 
                     elif self.leave_fw(theta_gtg, theta_ao, d_t, d_t1):
@@ -107,7 +120,7 @@ class NavigateToGoal():
                         fwf = True
 
                     else:
-                        d_t1 = np.sqrt((self.x_target - self.x)**2 + (self.y_target - self.y)**2) if fwf else d_t1
+                        d_t1 = self.calculate_distance(self.x_target, self.y_target, self.x, self.y) if fwf else d_t1
                         clk_cnt = self.clockwise_counter(self.x_target, self.y_target, self.x, self.y, self.theta, closest_angle) if fwf else clk_cnt
                         fwf = False
                         v_wf, w_wf = self.fw_controller(closest_angle, clk_cnt)
@@ -120,7 +133,15 @@ class NavigateToGoal():
 
     def at_goal(self):
         # This function checks if the robot is within the target position tolerance
-        return np.sqrt((self.x_target - self.x)**2 + (self.y_target - self.y)**2) < self.target_position_tolerance
+        distance = self.calculate_distance(self.x_target, self.y_target, self.x, self.y)
+        if distance < self.target_position_tolerance:
+            print(f"Reached point: ({self.x_target}, {self.y_target})")
+            return True
+        else:
+            return False
+
+    def calculate_distance(self, x_target, y_target, x_robot, y_robot):
+        return np.sqrt((x_target - x_robot)**2 + (y_robot - y_target)**2)
 
     def get_closest_object(self, lidar_msg):
         # This function returns the closest object range and angle from the lidar data
@@ -133,13 +154,13 @@ class NavigateToGoal():
 
     def compute_gtg_control(self, x_target, y_target, x_robot, y_robot, theta_robot):
         # This function calculates the linear and angular speeds to navigate towards a goal
-        kvmax = 0.2  # max linear speed gain
-        kwmax = 1.0  # max angular speed gain
+        kvmax = 0.6  # max linear speed gain
+        kwmax = 1.6  # max angular speed gain
 
         av = 1.0  # Exponential growth rate adjustment for linear speed
         aw = 2.0  # Exponential growth rate adjustment for angular speed
 
-        ed = np.sqrt((x_target - x_robot)**2 + (y_target - y_robot)**2)
+        ed = self.calculate_distance(x_target, y_target, x_robot, y_robot)
 
         # Calculate angle to the target position
         theta_target = np.arctan2(y_target - y_robot, x_target - x_robot)
@@ -163,7 +184,7 @@ class NavigateToGoal():
         return v, w
 
     def clockwise_counter(self, x_target, y_target, x_robot, y_robot, theta_robot, closest_angle):
-        # This function determines the direction (clockwise or counterclockwise) to follow the wall
+        # This function decides the direction to turn (clockwise or counter-clockwise) while following walls
         theta_target = np.arctan2(y_target - y_robot, x_target - x_robot)
         e_theta = theta_target - theta_robot
         e_theta = np.arctan2(np.sin(e_theta), np.cos(e_theta))
@@ -239,8 +260,9 @@ class NavigateToGoal():
     def goal_cb(self, goal):
         # Callback function to receive goal position from RViz
         print("Received new goal position.")
-        self.x_target = goal.pose.position.x
-        self.y_target = goal.pose.position.y
+        self.path_points = [(goal.pose.position.x, goal.pose.position.y)]
+        self.current_point_index = 0
+        self.x_target, self.y_target = self.path_points[self.current_point_index]
         self.goal_received = True
 
     def update_state(self, wr, wl, delta_t):
