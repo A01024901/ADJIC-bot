@@ -1,33 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-    <launch>
+<launch>
+    <arg name="bug" default="2"/>
 
-        <arg name="bug" default="2">
+    <!-- World -->
+    <!-- ADJIC_map.world -->
+    <!-- puzzlebot_aruco_markers.world -->
+    <arg name="world_name" default="$(find puzzlebot_gazebo)/worlds/ADJIC_map.world"/>
+    <include file="$(find puzzlebot_gazebo)/launch/puzzlebot_gazebo.launch">
+        <arg name="world_name" value="$(arg world_name)"/>
+        <arg name="gui" value="true"/>
+    </include>
+    
+    <!--Dependency Nodes-->
+    <node pkg="image_transport" type="republish" name="compress_img" args="raw in:=/puzzlebot_1/camera/image_raw compressed out:=/image_compressed"/>
+    <node pkg="minichal6" type="pub_calibration.py" name="camera_data"/>
+    <!--<node pkg="rqt_image_view" type="rqt_image_view" name="visual"/>-->
 
-        <!-- World -->
-        <!-- ADJIC_map.world -->
-        <!-- puzzlebot_aruco_markers.world -->
-        <arg name="world_name" default="$(find puzzlebot_gazebo)/worlds/ADJIC_map.world"/>
-        <include file="$(find puzzlebot_gazebo)/launch/puzzlebot_gazebo.launch">
-            <arg name="world_name" value="$(arg world_name)"/>
-            <arg name="gui" value="true"/>
-        </include>
-        
-        <!--Dependency Nodes-->
-        <node pkg="image_transport" type="republish" name="compress_img" args="raw in:=/puzzlebot_1/camera/image_raw compressed out:=/image_compressed"/>
-        <node pkg="minichal6" type="pub_calibration.py" name="camera_data"/>
-        <node pkg="rqt_image_view" type="rqt_image_view" name="visual"/>
+    <!--<node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop">
+        <remap from="/cmd_vel" to="/puzzlebot_1/base_controller/cmd_vel"/>
+    </node>-->
 
-        <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop">
-            <remap from="/cmd_vel" to="/puzzlebot_1/base_controller/cmd_vel"/>
-        </node>
+    <include file="$(find minichal7)/include/arucos/arucos_detect_sim.launch"/>
+    <include file="$(find minichal7)/include/rviz/rviz.launch"/>
 
-        <include file="$(find minichal7)/include/arucos/arucos_detect_sim.launch"/>
-        <include file="$(find minichal7)/include/rviz/rviz.launch"/>
-
-        <!--Minichal Nodes-->
-        <node pkg="minichal6" type="aruco_finder.py" name="aruco_finder"/>
-        <!--<node pkg="minichal6" type="odometry.py" name="odometry"/>-->
-        <node pkg="minichal6" type="bug$(arg bug).py" name="bug$(arg bug)"/>
-        
-        
-    </launch>
+    <!--Minichal Nodes-->
+    <node pkg="minichal7" type="aruco_finder.py" name="aruco_finder"/>
+    <node pkg="minichal7" type="odometry.py" name="odometry"/>
+    <!--<node pkg="minichal6" type="bug$(arg bug).py" name="bug$(arg bug)"/>-->
+</launch>

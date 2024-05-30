@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import rospy
 from geometry_msgs.msg import Twist, PoseStamped
-from std_msgs.msg import Float32
+from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan  # Lidar
+from tf.transformations import euler_from_quaternion
 import numpy as np
 
 # This class directs the puzzlebot towards a specified goal
@@ -23,7 +24,7 @@ class NavigateToGoal():
 
         ############ GOAL VARIABLES ############
 
-        self.path_points = [(1.0, 1.0), (2.0, 2.0), (3.0, 1.0)]  # List of points to follow
+        self.path_points = [(1.0, 1.0), (2.0, 1.0), (3.0, 1.0)]  # List of points to follow
         self.current_point_index = 0  # Index of the current target point
         self.x_target, self.y_target = self.path_points[self.current_point_index]  # Initialize with the first target point
         self.goal_received = False  # Flag goal received
@@ -35,8 +36,6 @@ class NavigateToGoal():
         stop_distance = 0.10  # Distance to stop the robot if an obstacle is close 
         eps = 0.20  # Safety buffer
         v_msg = Twist() 
-        self.wr = 0  # Right wheel speed [rad/s]
-        self.wl = 0  # Left wheel speed [rad/s]
         self.current_state = 'NavigateToGoal'  
 
         ### INITIALIZE PUBLISHERS ###
@@ -45,10 +44,9 @@ class NavigateToGoal():
 
         ####################### SUBSCRIBERS #######################
 
-        rospy.Subscriber("puzzlebot_1/wl", Float32, self.wl_cb)
-        rospy.Subscriber("puzzlebot_1/wr", Float32, self.wr_cb)
         rospy.Subscriber("puzzlebot_goal", PoseStamped, self.goal_cb)
         rospy.Subscriber("puzzlebot_1/scan", LaserScan, self.laser_cb)
+        rospy.Subscriber("puzzlebot_1/base_controller/odom", Odometry, self.odom_cb)
 
         ### INITIALIZE NODE ###
         freq = 20
@@ -62,7 +60,6 @@ class NavigateToGoal():
 
         ############### MAIN LOOP ###############
         while not rospy.is_shutdown():
-            self.update_state(self.wr, self.wl, dt)  # Update the robot's state
 
             if self.lidar_received:
                 closest_range, closest_angle = self.get_closest_object(self.lidar_msg)  # Get closest obstacle
@@ -243,19 +240,21 @@ class NavigateToGoal():
             return True
         else:
             return False
+        
+    def odom_cb(self, msg):
+        self.x = msg.pose.pose.position.x
+        self.y = msg.pose.pose.position.y
+
+        orientation_q = msg.pose.pose.orientation
+        orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
+        (_, _, self.theta) = euler_from_quaternion(orientation_list)
+
+        self.theta = np.arctan2(np.sin(self.theta), np.cos(self.theta))
 
     def laser_cb(self, msg):
         # Callback function to receive lidar data
         self.lidar_msg = msg
         self.lidar_received = True
-
-    def wl_cb(self, wl):
-        # Callback function to receive left wheel speed [rad/s]
-        self.wl = wl.data
-
-    def wr_cb(self, wr):
-        # Callback function to receive right wheel speed [rad/s]
-        self.wr = wr.data
 
     def goal_cb(self, goal):
         # Callback function to receive goal position from RViz
@@ -265,21 +264,6 @@ class NavigateToGoal():
         self.x_target, self.y_target = self.path_points[self.current_point_index]
         self.goal_received = True
 
-    def update_state(self, wr, wl, delta_t):
-        # Update the robot's state based on wheel speeds
-        v = self.r * (wr + wl) / 2
-        w = self.r * (wr - wl) / self.L
-
-        self.theta += w * delta_t
-
-        # Normalize theta to be within -pi and pi
-        self.theta = np.arctan2(np.sin(self.theta), np.cos(self.theta))
-
-        vx = v * np.cos(self.theta)
-        vy = v * np.sin(self.theta)
-
-        self.x += vx * delta_t
-        self.y += vy * delta_t
 
     def cleanup(self):
         vel_msg = Twist()

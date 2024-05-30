@@ -119,7 +119,6 @@ class ArucoFinder:
             for arucos in self.fiducial_transform.transforms:
                 for posiciones in self.arucos:
                     if arucos.fiducial_id == posiciones.ID:
-                        print("Fiducial ID: ", posiciones.ID)
 
                         x = arucos.transform.translation.x
                         y = arucos.transform.translation.y
@@ -139,6 +138,8 @@ class ArucoFinder:
         else:
             flag_msg = False
             angle_r = 0.0
+            d = 0
+            angle = 0
             
         array = [x , y , d , angle]
         return flag_msg , array

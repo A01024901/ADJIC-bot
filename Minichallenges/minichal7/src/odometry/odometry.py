@@ -14,9 +14,8 @@ class localisation:
         rospy.on_shutdown(self.cleanup)
 
         ###--- Subscriptores ---###
-        rospy.Subscriber("/wr" , Float32 , self.wr_cb)
-        rospy.Subscriber("/wl" , Float32 , self.wl_cb)
-        rospy.Subscriber("/ar_x" , Float32 , self.arx_cb)
+        rospy.Subscriber("/puzzlebot_1/wr" , Float32 , self.wr_cb)
+        rospy.Subscriber("/puzzlebot_1/wl" , Float32 , self.wl_cb)
         rospy.Subscriber("/ar_array" , Float32MultiArray , self.ary_cb)
         rospy.Subscriber("/arucos_flag" , Bool , self.flag_cb)
 
@@ -33,13 +32,12 @@ class localisation:
         self.w = 0.0
         self.wr = 0.0 
         self.wl = 0.0
-        self.xa = 0.0
-        self.ya = 0.0
+        self.ar_arr = []
         self.flag = False
         
         
         self.odom = Odometry()
-        self.covariance = dead_reckoning(self.dt , 0 , 0 , 0)
+        self.covariance = dead_reckoning(self.dt , 0.25 , 1.725 , 0)
         rate = rospy.Rate(int(1.0/self.dt))
 
         #while rospy.get_time() == 0: print ("Simulacion no iniciada")#Descomentar en simulacion 
@@ -48,7 +46,7 @@ class localisation:
 
         while not rospy.is_shutdown():
             self.get_robot_velocities()
-            cov_mat , u = self.covariance.calculate(self.v , self.w , self.wr , self.wl)
+            cov_mat , u = self.covariance.calculate(self.v , self.w , self.wr , self.wl , self.flag , self.ar_arr)
             self.get_odom(cov_mat , u)
 
             ###--- Publish ---###
@@ -60,7 +58,7 @@ class localisation:
         self.w = self.r * ((((2*self.v/self.r) - self.wl)-self.wl)/self.l)
 
     def get_odom (self , cov_mat , u): 
-        self.odom.header.frame_id = "odom"
+        self.odom.header.frame_id = "puzzlebot_1/base_footprint"
         self.odom.pose.pose.position.x = u[0] #+ 0.1
         self.odom.pose.pose.position.y = u[1]
 
@@ -88,11 +86,8 @@ class localisation:
     def wl_cb (self , msg):
         self.wl = msg.data
 
-    def arx_cb (self , msg):
-        self.xa = msg.data
-
     def ary_cb (self , msg):
-        self.ya = msg.data
+        self.ar_arr = msg.data
 
     def flag_cb (self , msg):
         self.flag = msg.data

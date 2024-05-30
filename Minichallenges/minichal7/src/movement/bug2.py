@@ -25,19 +25,17 @@ class AutonomousNav():
 
         ############ Variables ###############
 
-        self.path_points = [(1.0, 1.0), (2.0, 2.0), (3.0, 3.0)]  # Defining the waypoints
+        self.path_points = [(1.0, 1.0), (2.0, 1.0), (2.9, 0.3)]  # Defining the waypoints
         self.current_point_index = 0  # Index of the current waypoint
         self.x_target, self.y_target = self.path_points[self.current_point_index]  # Target position
         self.goal_received = True  # Since we're not waiting for goals, set it to True
         self.lidar_received = False  # Flag to indicate if the laser scan has been received
         self.target_position_tolerance = 0.1  # Acceptable distance to the goal to declare the robot has arrived [m]
-        fw_distance = 0.3
+        fw_distance = 0.25
         self.integral = 0.0
         self.prev_error = 0.0
         stop_distance = 0.10  # Distance from closest obstacle to stop the robot [m]
         v_msg = Twist()  # Robot's desired speed
-        self.wr = 0  # Right wheel speed [rad/s]
-        self.wl = 0  # Left wheel speed [rad/s]
         self.current_state = 'GoToGoal'  # Robot's current state
 
         ###******* INIT PUBLISHERS *******###
@@ -45,10 +43,9 @@ class AutonomousNav():
 
         ############################### SUBSCRIBERS #####################################
 
-        rospy.Subscriber("puzzlebot_1/wl", Float32, self.wl_cb)
-        rospy.Subscriber("puzzlebot_1/wr", Float32, self.wr_cb)
         rospy.Subscriber("puzzlebot_1/scan", LaserScan, self.laser_cb)
-        rospy.Subscriber("puzzlebot_1/base_controller/odom", Odometry, self.odom_cb)
+        rospy.Subscriber("/odom", Odometry, self.odom_cb)
+        #rospy.Subscriber("puzzlebot_1/base_controller/odom", Odometry, self.odom_cb)
 
         #********** INIT NODE **********###
         freq = 20
@@ -80,8 +77,6 @@ class AutonomousNav():
                     rospy.loginfo("Reached final goal. Stopping.")
                     self.pub_cmd_vel.publish(v_msg)
 
-           
-
             elif self.current_state == 'GoToGoal':
                 distance_to_target = self.calculate_distance(self.x_target, self.y_target, self.x, self.y)
                 print(f"Distance to current point: {distance_to_target:.2f} meters")
@@ -100,10 +95,14 @@ class AutonomousNav():
                     self.current_state = "WallFollower"
 
                 else:
-                    v_gtg, w_gtg = self.compute_gtg_control(self.x_target, self.y_target, self.x, self.y, self.theta)
-                    v_msg.angular.z = w_gtg
-                    rospy.sleep(0.2)
-                    v_msg.linear.x = v_gtg
+                    if self.clear_shot():
+                        print("Clear shot detected. Moving directly to the goal.")
+                        v_msg.linear.x, v_msg.angular.z = self.compute_gtg_control(self.x_target, self.y_target, self.x, self.y, self.theta)
+                    else:
+                        v_gtg, w_gtg = self.compute_gtg_control(self.x_target, self.y_target, self.x, self.y, self.theta)
+                        v_msg.angular.z = w_gtg
+                        rospy.sleep(0.2)
+                        v_msg.linear.x = v_gtg
 
             elif self.current_state == 'WallFollower':
                 theta_gtg, theta_ao = self.compute_angles(self.x_target, self.y_target, self.x, self.y, self.theta, closest_angle)
@@ -130,6 +129,8 @@ class AutonomousNav():
                     v_fw, w_fw = self.following_walls(closest_angle, clk_cnt)
                     v_msg.linear.x = v_fw
                     v_msg.angular.z = w_fw
+
+            print (self.x , self.y)
 
             self.pub_cmd_vel.publish(v_msg)
             rate.sleep()
@@ -169,6 +170,26 @@ class AutonomousNav():
 
         return closest_range, closest_angle
 
+    def clear_shot(self):
+        # Verificar si hay un "clear shot" hacia el siguiente punto en la ruta
+        forward_distance = 1.0  # Distancia hacia adelante para verificar si hay un camino despejado
+        num_samples = 10  # Número de muestras para tomar en el rango frontal del láser
+        angle_increment = (self.lidar_msg.angle_max - self.lidar_msg.angle_min) / self.lidar_msg.ranges.size
+        angle_start = -self.lidar_msg.angle_min  # Ángulo inicial del rango frontal del láser
+
+        for i in range(num_samples):
+            # Calcular el ángulo correspondiente a la muestra actual
+            angle = angle_start + i * angle_increment
+            # Obtener el índice correspondiente en los datos del láser
+            idx = int((angle - self.lidar_msg.angle_min) / angle_increment)
+            # Verificar si hay un obstáculo dentro de la distancia hacia adelante
+            if self.lidar_msg.ranges[idx] < forward_distance:
+                # Se encontró un obstáculo en el camino
+                return False
+
+        # No se encontraron obstáculos en la distancia hacia adelante
+        return True
+
     def is_near_enough(self, x1, y1, x2, y2, x3, y3, epsilon):
         a, b, c = self.line_equation(x2, y2, x3, y3)
         numerator = np.abs(a * x1 + b * y1 + c)
@@ -199,6 +220,24 @@ class AutonomousNav():
         else:
             return False
 
+    # def clockwise_counter(self, x_target, y_target, x_robot, y_robot, theta_robot, closest_angle):
+    #     theta_target = np.arctan2(y_target - y_robot, x_target - x_robot)
+    #     e_theta = theta_target - theta_robot
+    #     e_theta = np.arctan2(np.sin(e_theta), np.cos(e_theta))
+
+    #     theta_ao = closest_angle
+    #     theta_ao = np.arctan2(np.sin(theta_ao), np.cos(theta_ao))
+
+    #     theta_ao = theta_ao - np.pi
+    #     theta_ao = np.arctan2(np.sin(theta_ao), np.cos(theta_ao))
+
+    #     theta_fw = -np.pi / 2 + theta_ao
+    #     theta_fw = np.arctan2(np.sin(theta_fw), np.cos(theta_fw))
+
+    #     if np.abs(theta_fw - e_theta) <= np.pi / 2:
+    #         return 1
+    #     else:
+        #         return 0
     def clockwise_counter(self, x_target, y_target, x_robot, y_robot, theta_robot, closest_angle):
         theta_target = np.arctan2(y_target - y_robot, x_target - x_robot)
         e_theta = theta_target - theta_robot
@@ -210,13 +249,31 @@ class AutonomousNav():
         theta_ao = theta_ao - np.pi
         theta_ao = np.arctan2(np.sin(theta_ao), np.cos(theta_ao))
 
-        theta_fw = -np.pi / 2 + theta_ao
-        theta_fw = np.arctan2(np.sin(theta_fw), np.cos(theta_fw))
-
-        if np.abs(theta_fw - e_theta) <= np.pi / 2:
-            return 1
+        # Calcula la diferencia de ángulo entre la dirección hacia el objetivo y la dirección de la pared
+        angle_diff = np.abs(theta_ao - e_theta)
+        
+        # Calcula la dirección de rotación
+        if angle_diff > np.pi / 2:
+            clockwise = 1  # Sentido antihorario
         else:
-            return 0
+            clockwise = 0  # Sentido horario
+        
+        # Verifica si el ángulo es mayor a 110 grados para recalcular el sentido de giro
+        if angle_diff > np.deg2rad(110):
+            rospy.loginfo("Angle between target direction and wall direction is greater than 110 degrees. Recalculating clockwise.")
+            return 1 - clockwise  # Invertir el sentido de giro
+        else:
+            return clockwise
+
+
+    def has_passed_target(self, x_target, y_target, x_robot, y_robot, theta_robot):
+        # Calcula el vector desde el robot hasta el objetivo
+        target_vector = np.array([x_target - x_robot, y_target - y_robot])
+        # Calcula la distancia perpendicular desde el robot hasta el vector objetivo
+        perpendicular_distance = np.abs(np.cross(target_vector, np.array([np.cos(theta_robot), np.sin(theta_robot)])))
+        # Verifica si el robot ha pasado el punto objetivo
+        return perpendicular_distance < self.target_position_tolerance
+
 
     def compute_angles(self, x_target, y_target, x_robot, y_robot, theta_robot, closest_angle):
         theta_target = np.arctan2(y_target - y_robot, x_target - x_robot)
@@ -273,13 +330,6 @@ class AutonomousNav():
         self.lidar_msg = msg
         self.lidar_received = True
 
-    def wl_cb(self, wl):
-        ## This function receives the left wheel speed [rad/s]
-        self.wl = wl.data
-
-    def wr_cb(self, wr):
-        ## This function receives the right wheel speed [rad/s]
-        self.wr = wr.data
 
     def odom_cb(self, msg):
         self.x = msg.pose.pose.position.x
