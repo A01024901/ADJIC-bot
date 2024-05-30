@@ -5,6 +5,7 @@ from std_msgs.msg import Float32
 from std_msgs.msg import Bool
 from nav_msgs.msg import Odometry
 from tf.transformations import quaternion_from_euler
+from std_msgs.msg import Float32MultiArray
 
 class localisation:
     def __init__(self):
@@ -16,7 +17,7 @@ class localisation:
         rospy.Subscriber("/wr" , Float32 , self.wr_cb)
         rospy.Subscriber("/wl" , Float32 , self.wl_cb)
         rospy.Subscriber("/ar_x" , Float32 , self.arx_cb)
-        rospy.Subscriber("/ar_y" , Float32 , self.ary_cb)
+        rospy.Subscriber("/ar_array" , Float32MultiArray , self.ary_cb)
         rospy.Subscriber("/arucos_flag" , Bool , self.flag_cb)
 
         ###--- Publishers ---###
@@ -38,7 +39,7 @@ class localisation:
         
         
         self.odom = Odometry()
-        self.covariance = dead_reckoning(self.dt)
+        self.covariance = dead_reckoning(self.dt , 0 , 0 , 0)
         rate = rospy.Rate(int(1.0/self.dt))
 
         #while rospy.get_time() == 0: print ("Simulacion no iniciada")#Descomentar en simulacion 
@@ -47,7 +48,6 @@ class localisation:
 
         while not rospy.is_shutdown():
             self.get_robot_velocities()
-            self.update_robot_pose()
             cov_mat , u = self.covariance.calculate(self.v , self.w , self.wr , self.wl)
             self.get_odom(cov_mat , u)
 
