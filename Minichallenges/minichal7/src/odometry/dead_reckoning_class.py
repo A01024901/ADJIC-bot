@@ -49,10 +49,10 @@ class dead_reckoning:
         self.uncertainty()
         u = self.u_calc
         e = self.e
-        #if flag:
-            #self.correction(arr)
-            #u = self.u_real
-            #e = self.e_real
+        # if flag:
+        #     self.correction(arr)
+        #     u = self.u_real
+        #     e = self.e_real
 
         self.u_prev = np.copy(u)
         self.e_prev = np.copy(e)
