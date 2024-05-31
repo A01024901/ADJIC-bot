@@ -49,14 +49,14 @@ class dead_reckoning:
         self.uncertainty()
         u = self.u_calc
         e = self.e
-        # if flag:
-        #     self.correction(arr)
-        #     u = self.u_real
-        #     e = self.e_real
+        if flag:
+            self.correction(arr)
+            u = self.u_real
+            e = self.e_real
 
         self.u_prev = np.copy(u)
         self.e_prev = np.copy(e)
-
+        
         print(u)
         print(e)
 
@@ -81,7 +81,7 @@ class dead_reckoning:
         self.xa = arr[0]
         self.ya = arr[1]
         self.z_c = np.array([arr[2] , arr[3]])
-        self.R = np.array([[0.1 , 0] , [0 , 0.1]])
+        self.R = np.array([[0.03 , 0] , [0 , 0.004]])
         self.obs_model()
         self.unsertainty_pro()
         self.calc_u_e()

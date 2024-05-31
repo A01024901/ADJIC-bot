@@ -1,67 +1,11 @@
-#!/usr/bin/env python3 
+#!/usr/bin/env python3
 
 import rospy 
 import numpy as np
+from arucos import aruco
 from fiducial_msgs.msg import FiducialTransformArray
 from std_msgs.msg import Bool
 from std_msgs.msg import Float32MultiArray
-
-class aruco:
-    def __init__(self , ID , x , y):
-        self.ID = ID
-        self.x = x
-        self.y = y
-
-        self.robot2camera = np.array([
-            [0.0, 0.0, 1.0, 0.1],
-            [1.0, 0.0, 0.0, 0.0],
-            [0.0, -1.0, 0.0, 0.065],
-            [0.0, 0.0, 0.0, 1.0]])
-        
-        self.origin2aruco = np.array([
-            [1, 0.0, 0, x],
-            [0, 1, 0.0, y],
-            [0.0, 0, 1, 0.1],
-            [0.0, 0.0, 0.0, 1.0]])
-        
-    def transform_origin2robot(self , x , y  , z):
-        camera2aruco = np.array([
-            [1, 0.0, 0, x],
-            [0, 1, 0.0, y],
-            [0.0, 0, 1, z],
-            [0.0, 0.0, 0.0, 1.0]])
-        
-        aruco2camera = self.get_inv(camera2aruco)
-        camera2robot = self.get_inv(self.robot2camera)
-        
-        self.origin2robot = self.origin2aruco.dot(aruco2camera).dot(camera2robot)
-
-        return self.origin2robot
-    
-    def transform_robot2aruco(self , x , y  , z):
-        camera2aruco = np.array([
-            [1, 0.0, 0, x],
-            [0, 1, 0.0, y],
-            [0.0, 0, 1, z],
-            [0.0, 0.0, 0.0, 1.0]])
-        
-        robot2aruco = self.robot2camera.dot(camera2aruco)
-
-        return robot2aruco
-
-    def get_inv(self , T):
-        R = T[:3, :3]
-        t = T[:3, 3]
-        
-        R_inv = R.T
-        
-        t_inv = -R_inv @ t
-        
-        T_inv = np.eye(4)
-        T_inv[:3, :3] = R_inv
-        T_inv[:3, 3] = t_inv
-        
-        return T_inv
     
 class ArucoFinder:
     def __init__(self , mode):
@@ -89,17 +33,22 @@ class ArucoFinder:
                   aruco(704 , 2.63 , 0.39) , aruco(705 , 2.85 , 0.0) , aruco(706 , 2.87 , 1.22) ,
                   aruco(707 , 1.74 , 1.22)]
         
-        arucos_sim = [aruco(0 , 0.0 , 0.80) , aruco(1 , 0.0 , 1.60) , aruco(2 , 1.73 , 0.80) , 
-                       aruco(3 , 2.63 , 0.39) , aruco(4 , 2.85 , 0.0) , aruco(5 , 2.87 , 1.22)]
+        
+        arucos_sim = [aruco(0 , 0.02 , 0.80) , aruco(1 , 0.02 , 1.60) , aruco(2 , 1.71 , 0.80) , 
+                       aruco(3 , 2.58 , 0.40) , aruco(4 , 2.85 , 0.01) , aruco(5 , 2.85 , 1.98)]
+        
         
         if mode == "sim": self.arucos = arucos_sim
         elif mode == "real": self.arucos = arucos
 
         self.flag_msg = Bool()
         self.array_msg = Float32MultiArray()
+        self.flag = False
         
         self.fiducial_transform = FiducialTransformArray()
         rate = rospy.Rate(int(1.0 / self.dt))
+
+        while rospy.get_time() == 0 or self.flag: pass
 
         while not rospy.is_shutdown():
             flag , ar = self.process_transforms()
@@ -107,6 +56,9 @@ class ArucoFinder:
             rate.sleep()
 
     def process_transforms(self):
+        angle_r = 0
+        angle = 0
+        d = 0
         x = 0
         y = 0
         pub_msg = np.array([
@@ -137,11 +89,11 @@ class ArucoFinder:
                             y = posiciones.y
         else:
             flag_msg = False
-            angle_r = 0.0
             d = 0
             angle = 0
             
         array = [x , y , d , angle]
+        print(array)
         return flag_msg , array
         
     def pub_msgs(self , flag , t):
@@ -159,9 +111,10 @@ class ArucoFinder:
     
     def ft_cb(self, msg):
         self.fiducial_transform = msg
+        self.flag = True
 
     def cleanup(self):
         print("Apagando Localización")
 
 if __name__ == "__main__":
-    ArucoFinder("sim")
+    ArucoFinder("real")

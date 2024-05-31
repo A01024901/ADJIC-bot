@@ -1,21 +1,34 @@
-#!/usr/bin/env python3 
+#!/usr/bin/env python
 import rospy 
+import numpy as np
 from dead_reckoning_class import dead_reckoning
 from std_msgs.msg import Float32
 from std_msgs.msg import Bool
 from nav_msgs.msg import Odometry
 from tf.transformations import quaternion_from_euler
 from std_msgs.msg import Float32MultiArray
+import tf2_ros #ROS package to work with transformations 
+from geometry_msgs.msg import TransformStamped
 
 class localisation:
-    def __init__(self):
+    def __init__(self , mode):
         ###--- Inicio del Nodo ---###
         rospy.init_node('localisation')
         rospy.on_shutdown(self.cleanup)
 
+        if mode == "sim":
+            wr_sub = "/puzzlebot_1/wr"
+            wl_sub = "/puzzlebot_1/wl"
+            self.ref = "puzzlebot_1/base_footprint"
+        
+        elif mode == "real":
+            wr_sub = "/wr"
+            wl_sub = "/wl"
+            self.ref = "/chassis"
+
         ###--- Subscriptores ---###
-        rospy.Subscriber("/puzzlebot_1/wr" , Float32 , self.wr_cb)
-        rospy.Subscriber("/puzzlebot_1/wl" , Float32 , self.wl_cb)
+        rospy.Subscriber(wr_sub , Float32 , self.wr_cb)
+        rospy.Subscriber(wl_sub , Float32 , self.wl_cb)
         rospy.Subscriber("/ar_array" , Float32MultiArray , self.ary_cb)
         rospy.Subscriber("/arucos_flag" , Bool , self.flag_cb)
 
@@ -38,16 +51,19 @@ class localisation:
         
         self.odom = Odometry()
         self.covariance = dead_reckoning(self.dt , 0.25 , 1.725 , 0)
+        #self.covariance = dead_reckoning(self.dt , 0.0 , 0.0 , 0)
         rate = rospy.Rate(int(1.0/self.dt))
+        self.tf2_ros = tf2_ros.TransformBroadcaster() # Create a TransformBroadcaster object
+        self.t = TransformStamped()
 
         #while rospy.get_time() == 0: print ("Simulacion no iniciada")#Descomentar en simulacion 
-
-        print("Nodo operando")
 
         while not rospy.is_shutdown():
             self.get_robot_velocities()
             cov_mat , u = self.covariance.calculate(self.v , self.w , self.wr , self.wl , self.flag , self.ar_arr)
+            self.get_transform(u)
             self.get_odom(cov_mat , u)
+            print(u)
 
             ###--- Publish ---###
             self.odom_pub.publish(self.odom)
@@ -58,7 +74,8 @@ class localisation:
         self.w = self.r * ((((2*self.v/self.r) - self.wl)-self.wl)/self.l)
 
     def get_odom (self , cov_mat , u): 
-        self.odom.header.frame_id = "puzzlebot_1/base_footprint"
+        self.odom.header.frame_id = "odom"
+        self.odom.child_frame_id = "base_link"
         self.odom.pose.pose.position.x = u[0] #+ 0.1
         self.odom.pose.pose.position.y = u[1]
 
@@ -79,6 +96,27 @@ class localisation:
         self.odom.pose.covariance[30] = cov_mat[2][0] #Covariance in theta x
         self.odom.pose.covariance[31] = cov_mat[2][1] #Covariance in theta y
         self.odom.pose.covariance[35] = cov_mat[2][2] * 5 #Covariance in theta
+
+    def get_transform(self,u):
+            # Fill the transformation information 
+            self.t.header.stamp = rospy.Time.now() 
+            self.t.header.frame_id = "odom" 
+            self.t.child_frame_id = "base_link" 
+            self.t.transform.translation.x = u[0]
+            self.t.transform.translation.y = u[1] 
+            self.t.transform.translation.z = 0.0 
+            # self.theta += 0.01 #theta will be increasing 
+            #Clip the value of theta to the interval [-pi to pi] 
+            theta = np.arctan2(np.sin(u[2]), np.cos(u[2]))
+            #The transformation requires the orientation as a quaternion 
+            q = quaternion_from_euler(0, 0, theta) 
+            self.t.transform.rotation.x = q[0] 
+            self.t.transform.rotation.y = q[1] 
+            self.t.transform.rotation.z = q[2] 
+            self.t.transform.rotation.w = q[3] 
+            # A transformation is broadcasted instead of published 
+            self.tf2_ros.sendTransform(self.t) #broadcast the transformation 
+ 
         
     def wr_cb (self , msg):
         self.wr = msg.data
@@ -99,4 +137,4 @@ class localisation:
         
 
 if __name__ == "__main__": 
-    localisation()
+    localisation("real")

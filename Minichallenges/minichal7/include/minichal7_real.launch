@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
     <launch>
-        <!-- Args -->
-        <arg name="image" default="/image_compressed/compressed"/>
-        <arg name="camera_info" default="/camera_info"/>
+        <!-- Robot -->
+        <param name="robot_description" command="$(find xacro)/xacro '$(find adjic_autonomousnavigation_puzzlebot)/urdf/puzzlebot_lidar_real.xacro"/>
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false"/>
+        <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" respawn="false"/>
 
         <!-- Image nodes -->
         <node pkg="minichal6" type="pub_calibration.py" name="camera_data"/>

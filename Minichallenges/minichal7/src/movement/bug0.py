@@ -2,9 +2,10 @@
 import rospy
 from geometry_msgs.msg import Twist, PoseStamped
 from nav_msgs.msg import Odometry
+from std_msgs.msg import Float32
 from sensor_msgs.msg import LaserScan  # Lidar
-from tf.transformations import euler_from_quaternion
 import numpy as np
+from tf.transformations import euler_from_quaternion
 
 # This class directs the puzzlebot towards a specified goal
 class NavigateToGoal():
@@ -24,7 +25,7 @@ class NavigateToGoal():
 
         ############ GOAL VARIABLES ############
 
-        self.path_points = [(1.0, 1.0), (2.0, 1.0), (3.0, 1.0)]  # List of points to follow
+        self.path_points = [(1.0, 1.0), (2.0, 2.0), (3.0, 1.0)]  # List of points to follow
         self.current_point_index = 0  # Index of the current target point
         self.x_target, self.y_target = self.path_points[self.current_point_index]  # Initialize with the first target point
         self.goal_received = False  # Flag goal received
@@ -36,17 +37,19 @@ class NavigateToGoal():
         stop_distance = 0.10  # Distance to stop the robot if an obstacle is close 
         eps = 0.20  # Safety buffer
         v_msg = Twist() 
+        self.wr = 0  # Right wheel speed [rad/s]
+        self.wl = 0  # Left wheel speed [rad/s]
         self.current_state = 'NavigateToGoal'  
 
         ### INITIALIZE PUBLISHERS ###
 
-        self.pub_cmd_vel = rospy.Publisher('/puzzlebot_1/base_controller/cmd_vel', Twist, queue_size=1)
+        self.pub_cmd_vel = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
 
         ####################### SUBSCRIBERS #######################
 
+        rospy.Subscriber("/odom", Odometry, self.odom_cb)
         rospy.Subscriber("puzzlebot_goal", PoseStamped, self.goal_cb)
-        rospy.Subscriber("puzzlebot_1/scan", LaserScan, self.laser_cb)
-        rospy.Subscriber("puzzlebot_1/base_controller/odom", Odometry, self.odom_cb)
+        rospy.Subscriber("/scan", LaserScan, self.laser_cb)
 
         ### INITIALIZE NODE ###
         freq = 20
@@ -60,6 +63,7 @@ class NavigateToGoal():
 
         ############### MAIN LOOP ###############
         while not rospy.is_shutdown():
+            self.update_state(self.wr, self.wl, dt)  # Update the robot's state
 
             if self.lidar_received:
                 closest_range, closest_angle = self.get_closest_object(self.lidar_msg)  # Get closest obstacle
@@ -138,7 +142,7 @@ class NavigateToGoal():
             return False
 
     def calculate_distance(self, x_target, y_target, x_robot, y_robot):
-        return np.sqrt((x_target - x_robot)**2 + (y_robot - y_target)**2)
+        return np.sqrt((x_target - x_robot)*2 + (y_robot - y_target)*2)
 
     def get_closest_object(self, lidar_msg):
         # This function returns the closest object range and angle from the lidar data
@@ -240,16 +244,6 @@ class NavigateToGoal():
             return True
         else:
             return False
-        
-    def odom_cb(self, msg):
-        self.x = msg.pose.pose.position.x
-        self.y = msg.pose.pose.position.y
-
-        orientation_q = msg.pose.pose.orientation
-        orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
-        (_, _, self.theta) = euler_from_quaternion(orientation_list)
-
-        self.theta = np.arctan2(np.sin(self.theta), np.cos(self.theta))
 
     def laser_cb(self, msg):
         # Callback function to receive lidar data
@@ -264,6 +258,13 @@ class NavigateToGoal():
         self.x_target, self.y_target = self.path_points[self.current_point_index]
         self.goal_received = True
 
+    def odom_cb(self , msg):
+        self.x = msg.pose.pose.position.x
+        self.y = msg.pose.pose.position.y
+        or_q = msg.pose.pose.orientation
+        or_list = [or_q.x , or_q.y , or_q.z , or_q.w]
+        _ , _ , theta = euler_from_quaternion(or_list)
+        self.theta = np.arctan2(np.sin(theta) , np.cos(theta))
 
     def cleanup(self):
         vel_msg = Twist()
