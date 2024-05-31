@@ -3,7 +3,7 @@ import rospy
 import numpy as np
 from std_msgs.msg import Bool
 from geometry_msgs.msg import Twist
-from geometry_msgs.msg import PoseStamped
+from nav_msgs.msg import Odometry
 
 np.set_printoptions(suppress = True) 
 np.set_printoptions(formatter = {'float': '{: 0.4f}'.format})
@@ -21,16 +21,17 @@ class state_machine:
         rospy.init_node('state_machine')
         rospy.on_shutdown(self.cleanup)
 
+        ###--- Subscriptores ---### 
+        rospy.Subscriber("/odom" , Odometry , self.pos_gtg_cb)
+
         ###--- Subscriptores  GTG---###
-        rospy.Subscriber("gtg_twist" , Twist , self.gtg_cb)
-        rospy.Subscriber("pos_gtg" , PoseStamped , self.pos_gtg_cb)
-        rospy.Subscriber("target_gtg" , PoseStamped , self.target_gtg_cb)
-        rospy.Subscriber("at_goal_flag" , Bool , self.flag_gtg_cb)
+        rospy.Subscriber("/gtg_twist" , Twist , self.gtg_cb)
+        rospy.Subscriber("/finish_path" , Bool , self.flag_gtg_cb)
 
         ###-- Subscriptores FW ---###
-        rospy.Subscriber("fw_twist" , Twist , self.fw_cb)
-        rospy.Subscriber("front_object" , Bool , self.fw_f_cb)
-        rospy.Subscriber("front_clear" , Bool , self.fw_clear_cb)
+        rospy.Subscriber("/fw_twist" , Twist , self.fw_cb)
+        rospy.Subscriber("/front_object" , Bool , self.fw_f_cb)
+        rospy.Subscriber("/front_clear" , Bool , self.fw_clear_cb)
 
         ###--- Publishers ---###
         self.cmd_vel_pub = rospy.Publisher(cmd_vel_pub , Twist , queue_size=1)

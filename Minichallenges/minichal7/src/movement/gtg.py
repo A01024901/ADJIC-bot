@@ -9,29 +9,25 @@ from geometry_msgs.msg import PoseStamped
 from tf.transformations import quaternion_from_euler
 
 class GoToGoal:  
-    def __init__(self):  
+    def __init__(self): 
         ###--- Inicio del Nodo ---###
         rospy.init_node('go_to_goal')
         rospy.on_shutdown(self.cleanup)
 
         ###--- Subscriptores ---###
-        rospy.Subscriber("odom", Odometry, self.odom_cb)  
-        rospy.Subscriber("front_clear", Bool, self.front_clear_cb)
+        rospy.Subscriber("/odom", Odometry, self.odom_cb)  
 
         ###--- Publishers ---###
-        self.pub_cmd_vel = rospy.Publisher('gtg_twist', Twist, queue_size=1)  
-        self.pos_pub = rospy.Publisher('pos_gtg', PoseStamped, queue_size=1)
-        self.pos_t_pub = rospy.Publisher('target_gtg', PoseStamped, queue_size=1)
-        self.at_goal_flag_pub = rospy.Publisher('at_goal_flag', Bool, queue_size=1)
+        self.pub_cmd_vel = rospy.Publisher('/gtg_twist', Twist, queue_size=1)  
+        self.pos_t_pub = rospy.Publisher('/target_gtg', PoseStamped, queue_size=1)
+        self.at_goal_flag_pub = rospy.Publisher('/finish_path', Bool, queue_size=1)
 
         ###--- Constants ---###
         self.dt = 0.02
-        map = int(rospy.get_param('world_number' , "1"))
-        print (map)
-        positions = [[0.75 , -0.5] , [0.5 , -3.25] , [4.5,-2.25] , [4.5,-2.25]]
-        positions = [[1.0 , -0.5] , [0.05 , -3.4] , [4.75,-2.25] , [4.75,-2.25]]
-        self.x_target = positions[map][0]
-        self.y_target = positions[map][1]
+        self.path_points = [(1.0, 1.0), (2.0, 1.0), (3.0, 1.0)] 
+        index = 0
+        self.x_target = self.path_points[index][0]
+        self.y_target = self.path_points[index][1]
 
         ###--- Objetos ---###
         self.flag_msg = Bool()
@@ -43,6 +39,7 @@ class GoToGoal:
         ###--- Variables ---###
         self.state = "go_to_goal"
         self.at_goal_flag = False
+        self.finish_track = False
         self.x_pos = 0.0 
         self.y_pos = 0.0
         self.theta_robot = 0.0
@@ -57,22 +54,26 @@ class GoToGoal:
                 v, w = self.calc_gtg()
                 self.at_goal()
                 self.fill_messages(v, w)
-            elif self.state == "follow_walls":
-                v, w = self.follow_walls_behave()
+                if self.at_goal() and index < len(self.path_points):
+                    index += 1
+                    self.x_target = self.path_points[index][0]
+                    self.y_target = self.path_points[index][1]
 
-            self.check_state_transition()
+                if self.at_goal() and index == len(self.path_points):
+                    self.finish_track = True
+
 
             self.pub_cmd_vel.publish(self.v_msg) 
-            self.pos_pub.publish(self.pose)
             self.pos_t_pub.publish(self.pose_target)
             self.at_goal_flag_pub.publish(self.flag_msg)
             rate.sleep() 
 
     def calc_gtg (self):
-        kvmax = 0.17
-        kwmax = 0.8
-        av = 2.0
+        kvmax = 0.1
+        kwmax = 1.2
+        av = 1.0
         aw = 2.0
+
         ed = np.sqrt((self.x_target - self.x_pos)**2+(self.y_target - self.y_pos)**2)
         theta_target = np.arctan2(self.y_target - self.y_pos , self.x_target - self.x_pos)
         e_theta = theta_target - self.theta_robot
@@ -82,7 +83,9 @@ class GoToGoal:
             kw = kwmax * (1 - np.exp(-aw * e_theta **2))/abs(e_theta)
         else:
             kw = 0.05
+
         w = kw * e_theta
+
         if abs(e_theta) > np.pi/8:
             v = 0
         else:
@@ -90,18 +93,6 @@ class GoToGoal:
             v = kv * ed
 
         return v, w
-
-    def follow_walls_behave(self):
-        # Aquí implementa la lógica para seguir las paredes
-        v = 0.0
-        w = 0.0
-        return v, w
-
-    def check_state_transition(self):
-        if self.state == "go_to_goal" and self.at_goal_flag:
-            self.state = "follow_walls"
-        elif self.state == "follow_walls" and self.clear_path:
-            self.state = "go_to_goal"
 
     def at_goal(self):
         tolerance = 0.1
@@ -112,8 +103,7 @@ class GoToGoal:
     def fill_messages(self, v, w):
         self.v_msg.linear.x = v
         self.v_msg.angular.z = w
-        self.pose.pose.position.x = self.x_pos
-        self.pose.pose.position.y = self.y_pos
+        
         self.pose_target.pose.position.x = self.x_target
         self.pose_target.pose.position.y = self.y_target
 
@@ -123,7 +113,7 @@ class GoToGoal:
         self.pose.pose.orientation.z = quat[2]
         self.pose.pose.orientation.w = quat[3]
 
-        self.flag_msg.data = self.at_goal_flag
+        self.flag_msg.data = self.finish_track
 
     def odom_cb(self, msg):
         self.x_pos = msg.pose.pose.position.x
@@ -134,8 +124,6 @@ class GoToGoal:
         w = msg.pose.pose.orientation.w
         _ , _ , self.theta_robot = tf.euler_from_quaternion([x , y , z ,w])
 
-    def front_clear_cb(self, msg):
-        self.clear_path = msg.data
 
     def cleanup(self):  
         vel_msg = Twist() 

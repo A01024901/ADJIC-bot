@@ -7,6 +7,7 @@ from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import PoseStamped
 import tf.transformations as tf
 from geometry_msgs.msg import Twist
+from nav_msgs.msg import Odometry
 
 class follow_walls:
     def __init__(self , mode):
@@ -23,13 +24,13 @@ class follow_walls:
 
         ###--- Subscriptores ---###
         rospy.Subscriber(scan_sub, LaserScan, self.laser_cb)
-        rospy.Subscriber("pos_gtg" , PoseStamped , self.pos_gtg_cb) 
-        rospy.Subscriber("target_gtg" , PoseStamped , self.target_gtg_cb)
+        rospy.Subscriber("/odom" , Odometry , self.odom_cb) 
+        rospy.Subscriber("/target_gtg" , PoseStamped , self.target_gtg_cb)
 
         ###--- Publishers ---###
-        self.pub_cmd_vel = rospy.Publisher('fw_twist', Twist, queue_size=1) 
-        self.pub_flag_front = rospy.Publisher('front_object', Bool, queue_size=1) 
-        self.pub_flag_clear = rospy.Publisher('front_clear', Bool, queue_size=1) 
+        self.pub_cmd_vel = rospy.Publisher('/fw_twist', Twist, queue_size=1) 
+        self.pub_flag_front = rospy.Publisher('/front_object', Bool, queue_size=1) 
+        self.pub_flag_clear = rospy.Publisher('/front_clear', Bool, queue_size=1) 
 
         ###--- Constants ---###
         self.follow_distance = 0.25
@@ -60,8 +61,6 @@ class follow_walls:
 
         while not rospy.is_shutdown():
             if self.scan.ranges:
-                d = np.sqrt(((self.x_goal - self.x_pos) ** 2) + ((self.y_goal - self.y_pos) ** 2))
-                self.scan_flag = False
                 closest_distance = min(self.scan.ranges)
                 index = self.scan.ranges.index(closest_distance)
                 closest_angle = self.scan.angle_min + index * self.scan.angle_increment
@@ -74,7 +73,6 @@ class follow_walls:
 
                 rot = self.eval_rotation(closest_distance , closest_angle)
 
-                state = self.safe_zone(closest_distance , closest_angle)
                 print (closest_distance)
 
                 if self.safe_zone(closest_distance , closest_angle):
@@ -143,11 +141,14 @@ class follow_walls:
     def wl_cb (self , msg):
         self.wl = msg.data
 
-    def pos_gtg_cb(self , msg):
-        self.x_pos = msg.pose.position.x 
-        self.y_pos = msg.pose.position.y
-        orientation_q = msg.pose.orientation
-        _, _, self.yaw = tf.transformations.euler_from_quaternion([orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w])
+    def odom_cb(self, msg):
+        self.x_pos = msg.pose.pose.position.x
+        self.y_pos = msg.pose.pose.position.y
+        x = msg.pose.pose.orientation.x
+        y = msg.pose.pose.orientation.y
+        z = msg.pose.pose.orientation.z
+        w = msg.pose.pose.orientation.w
+        _ , _ , self.yaw = tf.euler_from_quaternion([x , y , z ,w])
 
     def target_gtg_cb(self , msg):
         self.x_goal = msg.pose.position.x 
@@ -164,4 +165,4 @@ class follow_walls:
         self.pub_flag_front.publish(Bool())        
 
 if __name__ == "__main__": 
-    follow_walls()
+    follow_walls("sim")
