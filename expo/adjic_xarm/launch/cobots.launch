@@ -1,0 +1,8 @@
+<launch> 
+
+  <include file="$(find xarm_bringup)/launch/dual_xarm6_server.launch">
+    <arg name="robot_ip_1" value="192.168.0.11"/>	
+    <arg name="robot_ip_2" value="192.168.0.31"/>	
+  </include>
+  
+</launch>
