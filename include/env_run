@@ -1,0 +1,22 @@
+#!/bin/bash
+# This simple wrapper allowing us to pass a set of
+# environment variables to be sourced prior to running
+# another command. Used in the launch file for setting
+# robot configurations prior to xacro.
+
+# To catch the first argument in a variable
+# If I call this script as env_run test
+# Then ENVVARS_FILE has the value of 'test'
+ENVVARS_FILE=$1
+# Shift makes my first argument become a new position. Depending on how much I shifted
+# If I shift 1, then my first argument will now be the second ($2)
+shift 1
+
+# Helps to export env variables so I can used them in terminal and in my script
+set -a
+# Updates my variable value to the one assigned here 
+source $ENVVARS_FILE 
+# Lists positional parameters specified in script invocation 
+# env_run test test1 test2
+# Gives me 'test' 'test1' 'test2'
+$@

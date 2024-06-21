@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+	<arg name="minichal_path" value="$(find adjic_bot)/Minichallenges/"/>
+
+        <node pkg="adjic_bot" type="puzzlebot_kinmatic_model.py" name="simulation"/>
+        <node pkg="adjic_bot" type="localization_m2.py" name="localization"/> 
+
+        <node pkg="tf2_ros" type="static_transform_publisher" name="map_joint" args="odomPose_x  odomPose_y  odomPose_z  odomPose_roll  odomPose_pitch  odomPose_yaw   map   odom"/>
+
+        <arg name="puzzlebot_sim_model" default="$(arg minichal_path)/robot_models/puzzlebot_2.urdf"/>
+        <param name="robot_description" command="cat $(arg puzzlebot_sim_model)" />
+
+        <node pkg="adjic_bot" type="wheels_rotation.py" name="joints_state"/>
+
+        <node pkg="robot_state_publisher" type="robot_state_publisher" name="simulated_state_publisher" output="screen"/>
+
+        <arg name="rvizconfig" default="$(find adjic_bot)/rviz/minichal2.rviz" />
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" /> 
+
+</launch>

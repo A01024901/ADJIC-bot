@@ -1,0 +1,21 @@
+<!-- start_usb_cam.launch --> 
+
+<launch>
+    <arg name="prefix" default=""/>
+    <arg name="tf_prefix" default="$(arg prefix)/"/> 
+    <arg name="video_device" default="/dev/video2" /> 
+    <arg name="image_width" default="640" /> 
+    <arg name="image_height" default="480" /> 
+
+    <node name="usb_cam_$(arg prefix)" pkg="usb_cam" type="usb_cam_node" > 
+        <param name="video_device" value="$(arg video_device)" /> 
+        <param name="image_width" value="$(arg image_width)" /> 
+        <param name="image_height" value="$(arg image_height)"/> 
+        <param name="pixel_format" value="yuyv"/> 
+        <param name="camera_frame_id" value="$(arg tf_prefix)usb_cam" /> 
+        <param name="io_method" value="mmap"/>
+        <remap from="/usb_cam/image_raw/compressed" to="$(arg prefix)/usb_cam/image_raw/compressed"/>
+        <remap from="/usb_cam/camera_info" to="$(arg prefix)/usb_cam/camera_info"/>
+    </node> 
+
+</launch>

@@ -1,0 +1,39 @@
+<launch> 
+  <rosparam file="$(find adjic_xarm)/parameters/params.yaml" command="load"/>
+
+  <arg name="robot_ip" default="192.168.0.11"/>	
+  <arg name="robot_name" default="L_xarm6" />
+  <param name="robot" value="$(arg robot_name)"/>
+
+  <arg name="report_type" default="normal" />	
+  <arg name="enforce_limits" default="true" />
+  <arg name="baud_checkset" default="true" />
+	<arg name="default_gripper_baud" default="2000000" />
+  <arg name="show_rviz" default="false" />
+  <arg name="add_gripper" default="false" />  
+  <arg name="use_moveit" default="false" />
+  
+  <rosparam file="$(find dual_xarm6_moveit_config)/config/xarm6_combined_control_config.yaml" command="load"/>
+
+  <include file="$(find xarm_bringup)/launch/xarm_driver_common.launch">
+    <arg name="robot_ip" value="$(arg robot_ip)" />
+    <arg name="report_type" value="$(arg report_type)" />
+    <arg name="dof" value="6" />
+    <arg name="use_moveit" value="$(arg use_moveit)" />
+    <arg name="namespace" value="$(arg robot_name)" />
+    <arg name="enforce_limits" value="$(arg enforce_limits)" />
+    <arg name="baud_checkset" value="$(arg baud_checkset)" />
+    <arg name="default_gripper_baud" value="$(arg default_gripper_baud)" />
+    <arg name="show_rviz" value="$(arg show_rviz)" />
+    <arg name="add_gripper" value="$(arg add_gripper)" />
+  </include>
+
+  <include file="$(find adjic_xarm)/launch/arucos.launch">
+    <arg name="robot" value="$(arg robot_name)"/>
+  </include>
+
+  <node name="cobot_$(arg robot_name)" pkg="adjic_xarm" type="robot_place.py" output="screen">
+    <param name="robot" value="$(arg robot_name)"/>
+  </node>
+  
+</launch>

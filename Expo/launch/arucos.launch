@@ -1,0 +1,20 @@
+<launch> 
+  <arg name="robot" default=""/>
+  <param name="robot" value="$(arg robot)"/>
+
+  <include file="$(find adjic_xarm)/launch/camera/start_usb_cam.launch">
+    <arg name="prefix" value="$(arg robot)"/>
+  </include>
+  <include file="$(find adjic_xarm)/launch/camera/aruco_detect.launch">
+    <arg name="prefix" value="$(arg robot)"/>
+  </include>
+
+  <include file="$(find adjic_xarm)/launch/rviz/rviz.launch">
+    <arg name="prefix" value="$(arg robot)"/>
+  </include>
+
+  <node name="aruco_finder__$(arg robot)" pkg="adjic_xarm" type="aruco_robot.py" >
+    <param name="robot" value="$(arg robot)"/>
+  </node>
+  
+</launch>
