@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <launch>
+        <!-- World Params -->
+        <arg name="gui" default="false"/>
+
+        <!-- World -->
+        <arg name="world_name" default="puzzlebot_aruco_markers.world"/>
+        <include file="$(find puzzlebot_gazebo)/launch/puzzlebot_gazebo.launch">
+            <arg name="world_name" value="$(arg world_name)"/>
+            <arg name="gui" value="$(arg gui)"/>
+        </include>
+        
+        <!--Minichalenge Nodes-->
+        <node pkg="image_transport" type="republish" name="compress_img" args="raw in:=/puzzlebot_1/camera/image_raw compressed out:=/image_compressed"/>
+        <node pkg="adjic_bot" type="pub_calibration.py" name="camera_data"/>
+        <node pkg="rqt_image_view" type="rqt_image_view" name="visual"/>
+        <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="controller" output="screen">
+            <remap from="/cmd_vel" to="/puzzlebot_1/base_controller/cmd_vel"/>
+        </node>
+
+        <include file="$(find adjic_bot)/Minichallenges/minichal6/launch/arucos/arucos_detect_sim.launch"/>
+        
+        
+
+    </launch>

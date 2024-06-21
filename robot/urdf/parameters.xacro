@@ -25,8 +25,8 @@
 <xacro:property name="cameraZ" value="0.06"/>
 
 
-<xacro:property name="mesh_chassis"  value="$(find adjic_autonomousnavigation_puzzlebot)/meshes/chassis.stl" />
-<xacro:property name="mesh_wheel"  value="$(find adjic_autonomousnavigation_puzzlebot)/meshes/wheel.stl" />
-<xacro:property name="mesh_camera"  value="$(find adjic_autonomousnavigation_puzzlebot)/meshes/camera.stl" />
+<xacro:property name="mesh_chassis"  value="$(find final_challenge)/robot/meshes/chassis.stl" />
+<xacro:property name="mesh_wheel"  value="$(find final_challenge)/robot/meshes/wheel.stl" />
+<xacro:property name="mesh_camera"  value="$(find final_challenge)/robot/meshes/camera.stl" />
 
 </robot>

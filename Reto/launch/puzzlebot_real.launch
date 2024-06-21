@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <launch>
+        <arg name="bug" default="0"/>
+
+        <!-- Robot -->
+        <param name="robot_description" command="$(find xacro)/xacro '$(find final_challenge)/robot/urdf/puzzlebot_lidar_real.xacro"/>
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false"/>
+        <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" respawn="false"/>
+
+        <!-- Image nodes -->
+        <node pkg="adjic_bot" type="pub_calibration.py" name="camera_data"/>
+        <node pkg="image_transport" type="republish" name="compress_img" args="raw in:=/video_source/raw compressed out:=/image_compressed"/>
+
+        <include file="$(find ros_deep_learning)/launch/video_source.ros1.launch"/>
+        <include file="$(find adjic_bot)/launch/include/arucos/arucos_detect_real.launch"/>
+        <include file="$(find rplicar_ros)/launch/rplidar_a1.launch"/>
+
+        <!-- Nodes-->
+        <node pkg="final_challenge" type="aruco_finder.py" name="aruco_finder"/>
+        <node pkg="final_challenge" type="odometry.py" name="odometry"/>
+        <node pkg="final_challenge" type="gtg.py" name="gtg_calculations" />
+        <!--<node pkg="final_challenge" type="bug$(arg bug).py" name="bug$(arg bug)"/>-->
+
+    </launch>

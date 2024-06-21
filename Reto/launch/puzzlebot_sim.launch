@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <launch>
+        <!-- Params -->
+        <param name="bug" value="zero"/>
+        <param name="mode" value="sim"/>
+        <!-- Bug number -->
+        <arg name="bug_num" value="$(param bug)"/>
+        <arg name="mode_name" default="$(param mode)"/><!-- or real -->
+
+        <!-- World & GUI -->
+        <arg name="world_name" default="$(find adjic_bot)/worlds/ADJIC_map.world"/>
+        <arg name="gui" default="false"/>
+        <arg name="pos_x" default="0.25"/>
+        <arg name="pos_y" default="1.725"/>
+        <arg name="pos_theta" default="0"/>
+
+        <include file="$(find adjic_bot)/Reto/launch/include/simulation/gazebo.launch">
+            <arg name="world_name" value="$(arg world_name)"/>
+            <arg name="gui" value="$(arg gui)" />
+            <arg name="pos_x" value="$(arg pos_x)"/>
+            <arg name="pos_y" value="$(arg pos_y)"/>
+            <arg name="pos_theta" value="$(arg pos_theta)"/>
+        </include>
+
+        <!-- Arucos Detect -->
+        <include file="$(find adjic_bot)/reto/launch/include/arucos/arucos_detect_sim.launch"/>
+
+        <!-- Rviz -->
+        <include file="$(find final_challenge)/launch/include/rviz/rviz.launch">
+            <arg name="mode" value="$(arg mode_name)"/>
+        </include>
+
+        <!-- PGM Map -->
+        <arg name="map_file" default="$(find adjic_bot)/maps/mymap.yaml"/>
+        <node pkg="tf" type="static_transform_publisher" name="map_link" args="0 2 0 0 0 0 1 odom map 100" />
+        <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)"/>
+
+        <!-- Nodes -->
+        <node pkg="adjic_bot" type="aruco_finder.py" name="aruco_finder"/>
+        <node pkg="adjic_bot" type="odometry.py" name="odometry"/> 
+        <node pkg="final_challenge" type="gtg.py" name="gtg"/>
+        <node pkg="final_challenge" type="bug$(arg bug_num).py" name="bug$(arg bug)"/>
+
+    </launch>

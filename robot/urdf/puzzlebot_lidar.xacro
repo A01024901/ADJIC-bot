@@ -3,10 +3,10 @@
 <robot name="puzzlebot" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
 <!-- files for gazebo costumization -->
-<xacro:include filename="$(find adjic_autonomousnavigation_puzzlebot)/urdf/materials.xacro" />
-<xacro:include filename="$(find adjic_autonomousnavigation_puzzlebot)/urdf/parameters.xacro" />
-<xacro:include filename="$(find adjic_autonomousnavigation_puzzlebot)/urdf/puzzlebot.gazebo" />
-<xacro:include filename="$(find adjic_autonomousnavigation_puzzlebot)/urdf/macros.xacro" />  
+<xacro:include filename="$(find final_challenge)/robot/urdf/materials.xacro" />
+<xacro:include filename="$(find final_challenge)/robot/urdf/parameters.xacro" />
+<xacro:include filename="$(find final_challenge)/robot/urdf/puzzlebot.gazebo" />
+<xacro:include filename="$(find final_challenge)/robot/urdf/macros.xacro" />  
 
 <!-- Dummy link to fiz robot chassis -->
   <link name="base_link">

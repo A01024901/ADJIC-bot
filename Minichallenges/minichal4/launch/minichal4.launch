@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+        
+
+        <!--Dependency nodes-->
+        <include file="$(find adjic_bot)/Minichallenges/minichal2/launch/nodes.launch"/> 
+
+        <!--Robot description-->
+        <include file="$(find adjic_bot)/Minichallenges/minichal2/launch/robot_desc.launch"/> 
+
+        <!--Experimental Points Mode-->
+        <node pkg="adjic_bot" type="graph_points.py" name="graphpoints" output="screen"/>
+        
+        <!--Test Mode-->
+        <node pkg="adjic_bot" type="testmode.py" name="test_mode" output="screen"/>
+        
+        <!--Rviz-->
+        <include file="$(find adjic_bot)/Minichallenges/minichal2/launch/rviz.launch"/> 
+</launch>

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!--Nodos de simulacion Minichal 2-->
+    <node pkg="adjic_bot" type="puzzlebot_kinmatic_model.py" name="simulation"/>
+    <node pkg="adjic_bot" type="localization_m4.py" name="localization"/> 
+    <node pkg="adjic_bot" type="wheels_rotation.py" name="joints_state"/>
+
+    <!--Nodo de transformadas-->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="map_joint" args="odomPose_x  odomPose_y  odomPose_z  odomPose_roll  odomPose_pitch  odomPose_yaw   map   odom"/>
+
+</launch>
